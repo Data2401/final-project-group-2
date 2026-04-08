@@ -1,6 +1,13 @@
 ---
 title: "Cause_o_Death"
 output: html_document
-author: Jorge Alejandro, Mia Alanis
+author: Jorge Alejandro, Mia Alanis, Bryce Borak
 ---
+```{r, echo = FALSE}
+library(tidyverse)
+library(shiny)
+#setting up the datasets we will be using for our projects
 
+death_ds <- read.csv("cause_of_deaths.csv")
+popu_ds <- read.csv("world_population.csv")
+```
