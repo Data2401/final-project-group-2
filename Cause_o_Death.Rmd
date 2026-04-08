@@ -3,6 +3,7 @@ title: "Cause_o_Death"
 output: html_document
 author: Jorge Alejandro, Mia Alanis, Bryce Borak
 ---
+
 ```{r, echo = FALSE}
 library(tidyverse)
 library(shiny)
