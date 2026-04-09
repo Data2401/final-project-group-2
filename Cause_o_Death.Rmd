@@ -1,10 +1,12 @@
 ---
-title: "Cause_o_Death"
-output: slidy_presentation
-author: Jorge Alejandro, Mia Alanis, Bryce Borak
+title: "Cause_of_Death"
+author: "Jorge Alejandro, Mia Alanis, Bryce Borak"
+output:
+  ioslides_presentation: default
+  slidy_presentation: default
 ---
 
-```{r, echo = FALSE, warning = FALSE, message = FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(shiny)
 
@@ -39,8 +41,6 @@ library(shiny)
 ## Our Data
 Our data come from Kaggle. "Cause of Deaths" and "World Population", both CSV data sets.
 
-Whyd we choose this data and what are we hoping to learn from it?
-
 ## What is Shown in our Data Set
 ```{r}
 tibble(dth_pplt_ds)
@@ -58,26 +58,10 @@ How are we using both these data set and what can we learn?
 
 - Continents and countries
 - Population and how we calculate "Death rate"
-- As the years go by, population increases. DOes this affect the death rate significantly?
+- As the years go by, population increases. Does this affect the death rate significantly?
+- Which diesease effects the most countries 
 
-## 
-```{r, echo = FALSE, warning = FALSE, message = FALSE}
-#Lets filter our data further.
-non_diseases <- c("Drowning", "Interpersonal.Violence", "Drug.Use.Disorders", "Alcohol.Use.Disorders", "Self.harm", "Exposure.to.Forces.of.Nature", "Environmental.Heat.and.Cold.Exposure", "Conflict.and.Terrorism", "Road.Injuries", "Poisonings", "Fire..Heat..and.Hot.Substances", "Maternal.Disorders")
 
-dth_pplt_ds %>% 
-  select(-c(non_diseases, Total.Death, Crude.Death.Rate)) -> ntrl_deaths
-
-ntrl_deaths %>% 
-  mutate(Total.Deaths = rowSums(ntrl_deaths[, 4:22], na.rm = TRUE), 
-         Crude.Death.Rate = (Total.Deaths/Population)/100) -> ntrl_deaths
-
-#Now we can try to find what continent has the highest number of deaths
-ntrl_deaths %>% group_by(Continent) %>% 
-  summarise(Highest_Death_Continent = max(Total.Deaths))
-
-ntrl_deaths %>% ggplot(aes(x = Continent, y = Total.Deaths)) + geom_boxplot() + scale_y_log10()
-```
 
 
 
@@ -87,9 +71,57 @@ ntrl_deaths %>% ggplot(aes(x = Continent, y = Total.Deaths)) + geom_boxplot() + 
 
 
 ```{r, echo = FALSE}
+death_ds %>% ggplot(aes(x = Year, y = Total.Death, )) + geom_point()
+  #For this graph to be a little bit more legible, we either have to change what kind of graph we use, or we solve the first issue of trying to combine population with year and use the color of continent.
 
 ```
+```{r}
+disease_country_count <- death_ds %>%
+  pivot_longer(
+    cols = -c(Country.Territory, Code, Year, Total.Death),
+    names_to = "Disease",
+    values_to = "Deaths"
+  ) %>%
+  filter(Deaths > 0) %>%
+  group_by(Disease) %>%
+  summarize(
+    Countries.Affected = n_distinct(Country.Territory),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(Countries.Affected))
 
-## What countries would require the most medical funding and research?
+disease_country_count
+```
+The above information shows which diseases effected the most countries. Below I found which diease effected the most countries and which effected the least.This could help by putting this into anotther study to find which disease should possoibly be researched more to find a possible cure. 
+```{r}
+most_affected <- disease_country_count %>%
+  slice_max(Countries.Affected, n = 1)
 
+least_affected <- disease_country_count %>%
+  slice_min(Countries.Affected, n = 1)
+
+most_affected
+least_affected
+```
+```{r}
+disease_totals <- death_ds %>%
+  pivot_longer(
+    cols = -c(Country.Territory, Code, Year, Total.Death),
+    names_to = "Disease",
+    values_to = "Deaths"
+  ) %>%
+  group_by(Disease) %>%
+  summarize(
+    Total.Deaths = sum(Deaths, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  filter(Total.Deaths > 0) %>%
+  arrange(desc(Total.Deaths))
+```
+
+
+```{r}
+disease_totals %>% arrange(desc(Total.Deaths)) %>% slice(1)
+disease_totals %>% arrange(Total.Deaths) %>% slice(1)
+```
 
