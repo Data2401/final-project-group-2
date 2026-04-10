@@ -42,7 +42,7 @@ death_ds %>% ggplot(aes(x = Year, y = Total.Death, )) + geom_point()
 ```
 
 ## Mia's Work
-```{r}
+```{r,echo = FALSE}
 #Mia's Work
 #cleaning up / orginizing
  death_ds <- read.csv("cause_of_deaths.csv")
@@ -55,7 +55,7 @@ death_ds_filtered <- death_ds %>%
 combine_data <- inner_join(death_ds_filtered, popu_ds, join_by(Country.Territory))
 ```
 
-```{r}
+```{r, echo = FALSE}
 #Mia's Work
 #filtering to only a single year and getting rid of population columns from other years
 #1970 but does not have death info
@@ -100,6 +100,26 @@ data_of_2022 <- combine_data %>%
 ```
 
 ```{r, echo = FALSE}
+#Mia's work
+#answering the question
+#What countries would require the most medical funding and research?
+#(this question would require insight on deaths NOT caused by natural causes or "Accident")
+
+#need to filter out deaths that arent natural causes or violent
+non_diseases <- c("Drowning", "Interpersonal.Violence", "Drug.Use.Disorders", "Alcohol.Use.Disorders", "Self.harm", "Exposure.to.Forces.of.Nature", "Environmental.Heat.and.Cold.Exposure", "Conflict.and.Terrorism", "Road.Injuries", "Poisonings", "Fire..Heat..and.Hot.Substances", "Maternal.Disorders")
+
+#death data with just diseases
+disease_deaths_data <- death_ds_filtered %>% 
+  select(-c(non_diseases))
+
+#death data with just diseases combine with population data
+disease_data_pop <- inner_join(disease_deaths_data, popu_ds, join_by(Country.Territory))
+
+#testing 2010 dataset with just diseases
+new_2010_data <- data_of_2010 %>% select(-non_diseases)
+```
+
+```{r}
 library(ggplot2)
 #Mia's work
 #testing a graph
