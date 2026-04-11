@@ -108,15 +108,26 @@ data_of_2022 <- combine_data %>%
 #need to filter out deaths that arent natural causes or violent
 non_diseases <- c("Drowning", "Interpersonal.Violence", "Drug.Use.Disorders", "Alcohol.Use.Disorders", "Self.harm", "Exposure.to.Forces.of.Nature", "Environmental.Heat.and.Cold.Exposure", "Conflict.and.Terrorism", "Road.Injuries", "Poisonings", "Fire..Heat..and.Hot.Substances", "Maternal.Disorders")
 
+diseases <- death_ds %>% 
+  select(-c(non_diseases, Year, Country.Territory, Code)) %>% 
+  names()
+
 #death data with just diseases
 disease_deaths_data <- death_ds_filtered %>% 
-  select(-c(non_diseases))
+  select(-c(non_diseases)) 
+
+#this replaces "." in column names to " "
+#save for the end because code wont work
+#colnames(disease_deaths_data) <- gsub("\\.", " ", colnames(disease_deaths_data))
 
 #death data with just diseases combine with population data
 disease_data_pop <- inner_join(disease_deaths_data, popu_ds, join_by(Country.Territory))
 
-#testing 2010 dataset with just diseases
+#testing dataset with just diseases
+new_1990_data <- data_of_1990 %>% select(-non_diseases)
+new_2000_data <- data_of_2000 %>% select(-non_diseases)
 new_2010_data <- data_of_2010 %>% select(-non_diseases)
+new_2015_data <- data_of_2015 %>% select(-non_diseases)
 ```
 
 ```{r}
@@ -126,5 +137,111 @@ library(ggplot2)
 
 ggplot(data = data_of_1990) + 
   geom_col(mapping = aes(x = Continent, y = Poisonings, fill = Continent))
+ 
+ggplot(new_2010_data, aes(x = Continent))                       
+
+#table
+#new_2010_data %>%
+  #select(Continent, Year, diseases)
+
 ```
+
+```{r, echo = FALSE}
+#code that orginzes each year long ways
+
+library(tidyverse)
+#2010
+continent_data_2010 <- new_2010_data %>%
+  group_by(Continent) %>%
+  summarise(across(Meningitis:Acute.Hepatitis, sum, na.rm = TRUE))
+
+long_data_2010 <- continent_data_2010 %>%
+  pivot_longer(cols = Meningitis:Acute.Hepatitis, 
+               names_to = "Disease", 
+               values_to = "Deaths")
+#1990
+continent_data_1990 <- new_1990_data %>%
+  group_by(Continent) %>%
+  summarise(across(Meningitis:Acute.Hepatitis, sum, na.rm = TRUE))
+
+long_data_1990 <- continent_data_1990 %>%
+  pivot_longer(cols = Meningitis:Acute.Hepatitis, 
+               names_to = "Disease", 
+               values_to = "Deaths")
+
+#2000
+continent_data_2000 <- new_2000_data %>%
+  group_by(Continent) %>%
+  summarise(across(Meningitis:Acute.Hepatitis, sum, na.rm = TRUE))
+
+long_data_2000 <- continent_data_2000 %>%
+  pivot_longer(cols = Meningitis:Acute.Hepatitis, 
+               names_to = "Disease", 
+               values_to = "Deaths")
+
+#2015
+continent_data_2015 <- new_2015_data %>%
+  group_by(Continent) %>%
+  summarise(across(Meningitis:Acute.Hepatitis, sum, na.rm = TRUE))
+
+long_data_2015 <- continent_data_2015 %>%
+  pivot_longer(cols = Meningitis:Acute.Hepatitis, 
+               names_to = "Disease", 
+               values_to = "Deaths")
+```
+
+## Graph Code
+```{r,echo = FALSE, fig.width=10, fig.height=10}
+#code for each graph for each year in a facet wrap
+#look at knit to see
+
+#1990
+continent_death_graph_1990 <- ggplot(long_data_1990, aes(x = reorder(Disease, Deaths), y = Deaths, fill = Disease)) +
+  geom_col() +
+  coord_flip() + # Makes long disease names easy to read
+  facet_wrap(~Continent) + 
+  theme_minimal() +
+  theme(legend.position = "none") + # Hide legend since names are on the Y-axis
+  labs(title = "1990 Global Disease Burden by Continent",
+       x = "Disease",
+       y = "Total Deaths")
+
+#2000
+continent_death_graph_2000 <- ggplot(long_data_2000, aes(x = reorder(Disease, Deaths), y = Deaths, fill = Disease)) +
+  geom_col() +
+  coord_flip() + # Makes long disease names easy to read
+  facet_wrap(~Continent) + 
+  theme_minimal() +
+  theme(legend.position = "none") + # Hide legend since names are on the Y-axis
+  labs(title = "2000 Global Disease Burden by Continent",
+       x = "Disease",
+       y = "Total Deaths")
+
+#2010
+continent_death_graph_2010 <- ggplot(long_data_2010, aes(x = reorder(Disease, Deaths), y = Deaths, fill = Disease)) +
+  geom_col() +
+  coord_flip() + # Makes long disease names easy to read
+  facet_wrap(~Continent) + 
+  theme_minimal() +
+  theme(legend.position = "none") + # Hide legend since names are on the Y-axis
+  labs(title = "2010 Global Disease Burden by Continent",
+       x = "Disease",
+       y = "Total Deaths")
+
+#2015
+continent_death_graph_2015 <- ggplot(long_data_2015, aes(x = reorder(Disease, Deaths), y = Deaths, fill = Disease)) +
+  geom_col() +
+  coord_flip() + # Makes long disease names easy to read
+  facet_wrap(~Continent) + 
+  theme_minimal() +
+  theme(legend.position = "none") + # Hide legend since names are on the Y-axis
+  labs(title = "2015 Global Disease Burden by Continent",
+       x = "Disease",
+       y = "Total Deaths")
+
+continent_death_graph_1990
+continent_death_graph_2000
+continent_death_graph_2010
+continent_death_graph_2015
+```       
 
