@@ -245,3 +245,26 @@ continent_death_graph_2010
 continent_death_graph_2015
 ```       
 
+## All Disease Deaths in Each Continent Over the Years
+```{r, echo = FALSE, fig.width=15, fig.height=8}
+#combine deaths of each continent in each year 
+p1 <- ggplot(long_data_1990, aes(x=Continent, y=Deaths, fill = Continent)) + geom_col() + labs(title="1990",  x = "Continents",
+       y = "Total Deaths")
+p2 <- ggplot(long_data_2000, aes(x=Continent, y=Deaths, fill = Continent)) + geom_col() + labs(title="2000",  x = "Continents",
+       y = "Total Deaths")
+p3 <- ggplot(long_data_2010, aes(x=Continent, y=Deaths, fill = Continent)) + geom_col() + labs(title="2010",  x = "Continents",
+       y = "Total Deaths")
+p4 <- ggplot(long_data_2015, aes(x=Continent, y=Deaths, fill = Continent)) + geom_col() + labs(title="2015",  x = "Continents",
+       y = "Total Deaths")
+
+library(patchwork)
+library(scales)
+
+# This creates a 2x2 grid automatically
+(p1 + p2) / (p3 + p4) & scale_y_continuous(
+  labels = label_comma(), 
+  breaks = seq(0, 30000000, by = 2500000), 
+  minor_breaks = seq(0, 30000000, by = 500000) 
+  & theme(legend.position = "none"))
+#Need to find a way to get rid of the key or just one make one
+```
