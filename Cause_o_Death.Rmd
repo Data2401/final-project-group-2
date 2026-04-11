@@ -4,6 +4,21 @@ output: slidy_presentation
 author: Jorge Alejandro, Mia Alanis, Bryce Borak
 ---
 
+```{r, echo = FALSE, }
+library(tidyverse)
+library(dplyr)
+library(shiny)
+library(ggplot2)
+library(scales)
+library(kableExtra)
+library(sf)
+install.packages("rnaturalearth", repos = "https://rstudio.com")
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(stringr)
+```
+
+
 ```{r, echo = FALSE}
 library(tidyverse)
 library(shiny)
@@ -45,9 +60,9 @@ death_ds %>% ggplot(aes(x = Year, y = Total.Death, )) + geom_point()
 
 ```
 
-## Mia's Work
+## What countries would require the most medical funding and research?
 
-```{r,echo = FALSE}
+```{r,echo = FALSE, warning=FALSE, message=FALSE}
 #Mia's Work
 #cleaning up / orginizing
  death_ds <- read.csv("cause_of_deaths.csv")
@@ -60,7 +75,7 @@ death_ds_filtered <- death_ds %>%
 combine_data <- inner_join(death_ds_filtered, popu_ds, join_by(Country.Territory))
 ```
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
 #Mia's Work
 
 #filtering to only a single year and getting rid of population columns from other years
@@ -108,7 +123,7 @@ data_of_2022 <- combine_data %>%
   select(-c(X1970.Population, X1980.Population, X1990.Population, X2010.Population, X2015.Population, X2020.Population, X2000.Population))
 ```
 
-```{r, echo = FALSE}
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
 #Mia's work
 #answering the question
 #What countries would require the most medical funding and research?
@@ -120,6 +135,8 @@ non_diseases <- c("Drowning", "Interpersonal.Violence", "Drug.Use.Disorders", "A
 diseases <- death_ds %>% 
   select(-c(non_diseases, Year, Country.Territory, Code)) %>% 
   names()
+
+clean_disease_names <- gsub("\\.", " ", diseases)
 
 #death data with just diseases
 disease_deaths_data <- death_ds_filtered %>% 
@@ -139,10 +156,8 @@ new_2010_data <- data_of_2010 %>% select(-non_diseases)
 new_2015_data <- data_of_2015 %>% select(-non_diseases)
 ```
 
-```{r, echo = FALSE}
-library(dplyr)
-library(ggplot2)
-library(scales)
+```{r, echo = FALSE, warning=FALSE, message=FALSE}
+
 #Should we use this? Maybe to narrow down to which disease to further do research in?
 #first graph shows the rise in death of all diseases
 
@@ -163,6 +178,9 @@ df2015 <- data.frame(Disease = names(total_disease_death_2015), Deaths = total_d
 
 # Stack them all together
 combined_disease_data <- rbind(df1990, df2000, df2010, df2015)
+combined_disease_data <- combined_disease_data %>%
+  mutate(Disease = str_to_title(gsub("\\.", " ", Disease)))
+
 
 #Sum up all individual disease totals into one grand total per year
 yearly_grand_totals <- data.frame(
@@ -174,12 +192,18 @@ yearly_grand_totals <- data.frame(
     sum(total_disease_death_2015, na.rm = TRUE)
   )
 )
+```
 
+## The Total Disease Death Count from 1990 - 2015
+Ever wondered how much death occurs just by disease alone? As we know the population is rapidly growing, but is there a growth in disease death as well?
+
+```{r, echo=FALSE, fig.width=10, fig.height=6}
+#Graph of Total Global Diseases Through the Years
 ggplot(yearly_grand_totals, aes(x = Year, y = Total_Deaths)) +
-  geom_line(color = "firebrick", size = 1.2) +
+  geom_line(color = "firebrick", linewidth = 1) +
   geom_point(color = "firebrick", size = 3) +
   # Adds exact amounts as labels above the points
-  geom_text(aes(label = comma(Total_Deaths)), vjust = -1, size = 3.5) +
+  geom_text(aes(label = comma(Total_Deaths)), vjust = -1.7, size = 3.5) +
   scale_y_continuous(labels = label_comma(), 
                      expand = expansion(mult = c(0.1, 0.2))) + # Adds headroom for labels
   theme_minimal() +
@@ -187,7 +211,21 @@ ggplot(yearly_grand_totals, aes(x = Year, y = Total_Deaths)) +
        subtitle = "Aggregated sum of all recorded diseases",
        x = "Year",
        y = "Total Deaths")
+```
 
+## All Diseases
+
+What are the Diseases we are referring to?
+
+```{r, echo = FALSE}
+clean_disease_names
+```
+
+## Comparing Graphs
+
+How has the death amount changed over the years for each specific diseases?
+
+```{r, echo = FALSE, fig.width=8, fig.height=6}
 #Sum up total deaths for every disease across all years
 disease_totals <- combined_disease_data %>%
   group_by(Disease) %>%
@@ -210,10 +248,14 @@ ggplot(combined_disease_data, aes(x = Year, y = Deaths, color = Disease, group =
   labs(title = "Total Deaths by Disease (1990-2015)",
        x = "Year",
        y = "Total Global Deaths")
+```
 
+Lets simplify further more to just the top 5 disease with the highest death counts. 
+
+```{r, echo=FALSE}
 #Graph of the top 5 disease
 ggplot(top_5_data, aes(x = Year, y = Deaths, color = Disease, group = Disease)) +
-  geom_line(size = 1.2) +
+  geom_line(linewidth = 1.2) +
   geom_point(size = 2) +
   scale_y_continuous(labels = label_comma()) +
   theme_minimal() +
@@ -224,11 +266,12 @@ ggplot(top_5_data, aes(x = Year, y = Deaths, color = Disease, group = Disease)) 
 
 ```
 
-```{r, echo = FALSE}
+In summary, the number one deaths by a disease is Cardiovascular Disease.
+
+```{r, echo = FALSE, fig.width=12, fig.height=8}
 #code that orginzes each year long ways
 #might not use
 
-library(tidyverse)
 #2010
 continent_data_2010 <- new_2010_data %>%
   group_by(Continent) %>%
@@ -269,8 +312,11 @@ long_data_2015 <- continent_data_2015 %>%
                values_to = "Deaths")
 ```
 
+## If I Were A Reasercher, Where Would I Go?
+
+This graph shows the years: 1990, 2000, 2010, 2015, and comparing the leading cause of death by Continent.
+
 ```{r, echo=FALSE, fig.width=12, fig.height=8}
-library(dplyr)
 
 # Combine all years into one master list
 all_years_long <- bind_rows(
@@ -284,9 +330,8 @@ all_years_long <- bind_rows(
 top_diseases_per_continent <- all_years_long %>%
   group_by(Year, Continent) %>%
   slice_max(Deaths, n = 1)
-
-library(ggplot2)
-library(scales)
+top_diseases_per_continent <- top_diseases_per_continent %>%
+  mutate(Disease = str_replace_all(Disease, "\\.", " "))
 
 ggplot(top_diseases_per_continent, aes(x = Continent, y = Deaths, fill = Disease)) +
   geom_col() +
@@ -301,85 +346,62 @@ ggplot(top_diseases_per_continent, aes(x = Continent, y = Deaths, fill = Disease
 
 ```
 
-## Graph Code
+As you can see in all four years, Asia stood on top. Also, cardiovascular was the highest disease for every continent in 2010 and 2015.
 
-```{r,echo = FALSE, fig.width=10, fig.height=10}
-#code for each graph for each year in a facet wrap
-#look at knit to see
+## Deeper Dive Into Asia
 
-#might not use
+Here is a visual map of Asia's Cardiovascular Deaths, labeling the top 5 Countries.
 
-#1990
-continent_death_graph_1990 <- ggplot(long_data_1990, aes(x = reorder(Disease, Deaths), y = Deaths, fill = Disease)) +
-  geom_col() +
-  coord_flip() + # Makes long disease names easy to read
-  facet_wrap(~Continent) + 
-  theme_minimal() +
-  theme(legend.position = "none") + # Hide legend since names are on the Y-axis
-  labs(title = "1990 Global Disease Burden by Continent",
-       x = "Disease",
-       y = "Total Deaths")
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
 
-#2000
-continent_death_graph_2000 <- ggplot(long_data_2000, aes(x = reorder(Disease, Deaths), y = Deaths, fill = Disease)) +
-  geom_col() +
-  coord_flip() + # Makes long disease names easy to read
-  facet_wrap(~Continent) + 
-  theme_minimal() +
-  theme(legend.position = "none") + # Hide legend since names are on the Y-axis
-  labs(title = "2000 Global Disease Burden by Continent",
-       x = "Disease",
-       y = "Total Deaths")
+# Get world map data as an 'sf' object
+world <- ne_countries(scale = "medium", returnclass = "sf")
 
-#2010
-continent_death_graph_2010 <- ggplot(long_data_2010, aes(x = reorder(Disease, Deaths), y = Deaths, fill = Disease)) +
-  geom_col() +
-  coord_flip() + # Makes long disease names easy to read
-  facet_wrap(~Continent) + 
-  theme_minimal() +
-  theme(legend.position = "none") + # Hide legend since names are on the Y-axis
-  labs(title = "2010 Global Disease Burden by Continent",
-       x = "Disease",
-       y = "Total Deaths")
+# Filter specifically for Asia
+asia_map <- world[world$continent == "Asia", ]
 
-#2015
-continent_death_graph_2015 <- ggplot(long_data_2015, aes(x = reorder(Disease, Deaths), y = Deaths, fill = Disease)) +
-  geom_col() +
-  coord_flip() + # Makes long disease names easy to read
-  facet_wrap(~Continent) + 
-  theme_minimal() +
-  theme(legend.position = "none") + # Hide legend since names are on the Y-axis
-  labs(title = "2015 Global Disease Burden by Continent",
-       x = "Disease",
-       y = "Total Deaths")
+map_with_data <- asia_map %>%
+  left_join(new_2015_data, by = c("name" = "Country.Territory"))
 
-continent_death_graph_1990
-continent_death_graph_2000
-continent_death_graph_2010
-continent_death_graph_2015
+#the top 5 countries
+top_5_countries <- map_with_data %>%
+  arrange(desc(Cardiovascular.Diseases)) %>%
+  head(5)
+  
+top_5_countries <- top_5_countries %>%
+  mutate(
+    my_nudge_y = case_when(
+      name == "Japan"     ~ -6.0,  # Moves Japan down by 2 degrees
+      name == "Indonesia" ~ -2.0,  # Moves Indonesia down by 3.5 degrees
+      TRUE                ~ 0.0    # Everyone else stays at 0
+    )
+  )
+
+# Plotting deaths (e.g., Cardiovascular)
+ggplot(data = map_with_data) +
+  geom_sf(aes(fill = Cardiovascular.Diseases), color = "black", size = 0.1) +
+  geom_sf_text(data = top_5_countries, aes(label = name), 
+                 nudge_y = top_5_countries$my_nudge_y,
+               size = 3, fontface = "bold", nudge_y = 0) +
+  scale_fill_distiller(
+    palette = "YlOrRd", 
+    direction = 1, 
+    labels = scales::comma,
+    na.value = "grey90"
+  ) + # Added the missing + here
+  theme_void() + 
+  labs(fill = "Deaths", title = "Cardiovascular Deaths Across Asia")
 ```
 
-## All Disease Deaths in Each Continent Over the Years
+Each country's Cardiovascular Deaths in Asia, sorted from the highest to lowest.
 
-```{r, echo = FALSE, fig.width=15, fig.height=8}
-#combine deaths of each continent in each year 
-p1 <- ggplot(long_data_1990, aes(x=Continent, y=Deaths, fill = Continent)) + geom_col() + labs(title="1990",  x = "Continents",
-       y = "Total Deaths")
-p2 <- ggplot(long_data_2000, aes(x=Continent, y=Deaths, fill = Continent)) + geom_col() + labs(title="2000",  x = "Continents",
-       y = "Total Deaths")
-p3 <- ggplot(long_data_2010, aes(x=Continent, y=Deaths, fill = Continent)) + geom_col() + labs(title="2010",  x = "Continents",
-       y = "Total Deaths")
-p4 <- ggplot(long_data_2015, aes(x=Continent, y=Deaths, fill = Continent)) + geom_col() + labs(title="2015",  x = "Continents",
-       y = "Total Deaths")
-
-library(patchwork)
-library(scales)
-
-# This creates a 2x2 grid automatically
-(p1 + p2) / (p3 + p4) & scale_y_continuous(
-  labels = label_comma(), 
-  breaks = seq(0, 30000000, by = 2500000), 
-  minor_breaks = seq(0, 30000000, by = 500000) 
-  & theme(legend.position = "none"))
-#Need to find a way to get rid of the key or just one make one
+```{r, echo=FALSE, fig.width=8, fig.height=15}
+new_2015_data %>% 
+  filter(Continent == "Asia") %>% 
+  group_by(Country.Territory) %>% 
+  summarize(Total_CVD = sum(Cardiovascular.Diseases, na.rm = TRUE)) %>% 
+  arrange(desc(Total_CVD)) %>% 
+  kbl(col.names = c("Country", "Total Cardiovascular Deaths")) %>% # Set clean names here
+  kable_paper() %>% 
+  scroll_box(height = "500px", width = "1000px")
 ```
