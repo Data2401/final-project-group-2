@@ -37,23 +37,27 @@ library(shiny)
   dth_pplt_ds %>% mutate(Crude.Death.Rate = (Total.Death / Population) * 1000, .after = "Total.Death") -> dth_pplt_ds
 ```
 
-## What our dataset includes
-
--   What represents the collumns?
--   What are the rows?
-
+## What is Shown in our Data Set
 ```{r}
-glimpse(death_ds)
-glimpse(popu_ds)
+tibble(dth_pplt_ds)
 ```
 
-Does mortality rate decrease as the years go by?
+## What Makes up the Majority of Our Columns?
+### Our dataset show various different death causes, both natural and unnatural.
+```{r, echo = FALSE, warning = FALSE}
+print(colnames(dth_pplt_ds)[5:34])
+```
+## What Can we Learn with Our Data
 
-What countries would require the most medical funding and research? (this question would require insight on deaths NOT caused by natural causes or "Accident")
 
-## Graphs
 
-Does mortality rate decrease as the years go by?
+
+
+
+
+
+
+
 
 ```{r, echo = FALSE}
 death_ds %>% ggplot(aes(x = Year, y = Total.Death, )) + geom_point()
