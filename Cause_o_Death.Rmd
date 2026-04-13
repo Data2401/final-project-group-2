@@ -4,7 +4,7 @@ output: slidy_presentation
 author: Jorge Alejandro, Mia Alanis, Bryce Borak
 ---
 
-```{r, warning = FALSE, echo = FALSE}
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
 library(tidyverse)
 library(shiny)
 
@@ -34,7 +34,7 @@ library(shiny)
   
 #We might also want to use the numbers of the death rate of a population so im going to mutate the dataset to have that in the final column
   
-  dth_pplt_ds %>% mutate(Crude.Death.Rate = (Total.Death / Population) * 1000, .after = "Total.Death")
+  dth_pplt_ds %>% mutate(Crude.Death.Rate = (Total.Death / Population) * 1000, .after = "Total.Death") -> dth_pplt_ds
 ```
 
 ## What our dataset includes
