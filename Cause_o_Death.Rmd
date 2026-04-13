@@ -36,6 +36,8 @@ library(shiny)
   
   dth_pplt_ds %>% mutate(Crude.Death.Rate = (Total.Death / Population) * 1000, .after = "Total.Death") -> dth_pplt_ds
 ```
+## Our Data
+Our data come from Kaggle. "Cause of Deaths" and "World Population", both CSV data sets.
 
 ## What is Shown in our Data Set
 ```{r}
@@ -48,7 +50,13 @@ tibble(dth_pplt_ds)
 print(colnames(dth_pplt_ds)[5:34])
 ```
 ## What Can we Learn with Our Data
+Our main focus is the "Cause of Deaths Data set", So where does the "World Population" data set come into play?
 
+How are we using both these data set and what can we learn?
+
+- Continents and countries
+- Population and how we calculate "Death rate"
+- As the years go by, population increases. DOes this affect the death rate significantly?
 
 
 
