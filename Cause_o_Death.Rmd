@@ -76,7 +76,7 @@ ntrl_deaths %>%
 ntrl_deaths %>% group_by(Continent) %>% 
   summarise(Highest_Death_Continent = max(Total.Deaths))
 
-ntrl_deaths %>% ggplot(aes(x = Continent, y = Total.Deaths)) + geom_boxplot() + scale_y_log10()
+ntrl_deaths %>% ggplot(aes(x = Continent, y = Total.Deaths)) + geom_boxplot() + scale_y_log10() + facet_wrap(~Year)
 ```
 
 
