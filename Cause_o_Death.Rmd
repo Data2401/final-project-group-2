@@ -61,8 +61,22 @@ How are we using both these data set and what can we learn?
 - As the years go by, population increases. DOes this affect the death rate significantly?
 
 ## 
-```{r}
-#
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+#Lets filter our data further.
+non_diseases <- c("Drowning", "Interpersonal.Violence", "Drug.Use.Disorders", "Alcohol.Use.Disorders", "Self.harm", "Exposure.to.Forces.of.Nature", "Environmental.Heat.and.Cold.Exposure", "Conflict.and.Terrorism", "Road.Injuries", "Poisonings", "Fire..Heat..and.Hot.Substances", "Maternal.Disorders")
+
+dth_pplt_ds %>% 
+  select(-c(non_diseases, Total.Death, Crude.Death.Rate)) -> ntrl_deaths
+
+ntrl_deaths %>% 
+  mutate(Total.Deaths = rowSums(ntrl_deaths[, 4:22], na.rm = TRUE), 
+         Crude.Death.Rate = (Total.Deaths/Population)/100) -> ntrl_deaths
+
+#Now we can try to find what continent has the highest number of deaths
+ntrl_deaths %>% group_by(Continent) %>% 
+  summarise(Highest_Death_Continent = max(Total.Deaths))
+
+ntrl_deaths %>% ggplot(aes(x = Continent, y = Total.Deaths)) + geom_boxplot() + scale_y_log10()
 ```
 
 
@@ -73,8 +87,6 @@ How are we using both these data set and what can we learn?
 
 
 ```{r, echo = FALSE}
-death_ds %>% ggplot(aes(x = Year, y = Total.Death, )) + geom_point()
-  #For this graph to be a little bit more legible, we either have to change what kind of graph we use, or we solve the first issue of trying to combine population with year and use the color of continent.
 
 ```
 
