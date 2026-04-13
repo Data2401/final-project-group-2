@@ -81,7 +81,10 @@ death_ds %>% ggplot(aes(x = Year, y = Total.Death, )) + geom_point()
 ## What countries would require the most medical funding and research?
 
 ```{r}
-
+#Top 10 highest death rate percentage (not filtered to just diseases)
+dth_pplt_ds %>% 
+  filter(Year == 2015) %>% 
+  slice_max(Crude.Death.Rate, n = 10)
 
 ```
 
