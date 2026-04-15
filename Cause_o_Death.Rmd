@@ -123,8 +123,6 @@ Things to consider
 ntrl_deaths %>% group_by(Continent) %>% 
   summarise(Highest_Death_Continent = max(Total.Deaths))
 
-ntrl_deaths %>% ggplot(aes(x = Continent, y = Total.Deaths)) + geom_boxplot() + scale_y_log10() + facet_wrap(~Year)
-
 ntrl_deaths %>% 
   ggplot(aes(x = Continent, y = Total.Deaths, fill = Continent)) + 
   geom_boxplot(outlier.alpha = 0.5) + # Makes outliers slightly transparent
@@ -192,7 +190,8 @@ We could choose Asia based on their total deaths, but...?
 what about Africa?
 
 Which continent should we actually choose?
----
+
+## [Insert title]
 
 ```{r}
 disease_country_count <- death_ds %>%
