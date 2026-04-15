@@ -107,9 +107,21 @@ ntrl_deaths %>% ggplot(aes(x = Population,
                            color = Continent)) + 
   geom_line() + facet_wrap(~Year)
 ```
-Based on this graph, what conclusion can we make?
+### Based on this graph, what conclusion can we make?
+The real reason why Asia has the highest total deaths.
 
+## Death Rates Over Time Based in Continents
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+ntrl_deaths %>% 
+  group_by(Continent, Year) %>% 
+  summarise(Year, 
+            Average.Death.Rate = mean(Crude.Death.Rate)) -> Avg.DthRt.Continent
 
+Avg.DthRt.Continent %>% ggplot(aes(x = Year, 
+                                   y = Average.Death.Rate, 
+                                   color = Continent)) + geom_line()
+```
+If we compare every continents death rates over the year, we may see africa has the highest percentages compared to other continents, but thats not all we see.
 
 ---
 ```{r}
