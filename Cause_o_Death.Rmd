@@ -38,6 +38,7 @@ library(ggplot2)
   
 non_diseases <- c("Drowning", "Interpersonal.Violence", "Drug.Use.Disorders", "Alcohol.Use.Disorders", "Self.harm", "Exposure.to.Forces.of.Nature", "Environmental.Heat.and.Cold.Exposure", "Conflict.and.Terrorism", "Road.Injuries", "Poisonings", "Fire..Heat..and.Hot.Substances", "Maternal.Disorders")
 ```
+
 ## Our Data
 Our data come from Kaggle. "Cause of Deaths" and "World Population", both CSV data sets.
 
@@ -47,7 +48,9 @@ tibble(dth_pplt_ds)
 ```
 
 ## What Makes up the Majority of Our Columns?
-### Our dataset show various different death causes, both natural and unnatural.
+
+Our dataset show various different death causes, both natural and unnatural.
+
 ```{r, echo = FALSE, warning = FALSE}
 all_cause_cols <- colnames(dth_pplt_ds)[5:34]
 
@@ -79,6 +82,7 @@ death_table
 ```
 
 ## What Can we Learn with Our Data
+
 Our main focus is the "Cause of Deaths Data set", So where does the "World Population" data set come into play?
 
 How are we using both these data set and what can we learn?
@@ -100,9 +104,11 @@ ntrl_deaths %>%
          Crude.Death.Rate = (Total.Deaths/Population)/100) -> ntrl_deaths
 
 ```
+
          Crude.Death.Rate = (Total.Deaths/Population)*1000) -> ntrl_deaths
 
 ## Now we can try to find what continent has the highest number of deaths
+
 ```{r echo=FALSE}
 ntrl_deaths %>% group_by(Continent) %>% 
   summarise(Highest_Death_Continent = max(Total.Deaths))
@@ -123,13 +129,7 @@ ntrl_deaths %>%
 
 ```
 
-=======
-ntrl_deaths %>% ggplot(aes(x = Continent, 
-                           y = Total.Deaths, 
-                           color = Continent)) + geom_boxplot() + 
-  scale_y_log10() + 
-  facet_wrap(~Year)
-```
+
 
 ## Continents with the Most Deaths
 
@@ -147,20 +147,24 @@ ntrl_deaths %>% group_by(Continent) %>%
   The data here shows that the average death rate in higher in Africa. But how is this when more people die in total in Asia. To understand this, lets learn about the values
   
 - what is crude death rate?
--what does it mean for asia and their deaths?
--How can we choose between these 2 continents?
+- what does it mean for asia and their deaths?
+- How can we choose between these 2 continents?
 
 ---
+
 ```{r, echo = FALSE, message = FALSE, warning = FALSE}
 ntrl_deaths %>% ggplot(aes(x = Population, 
                            y = Total.Deaths, 
                            color = Continent)) + 
   geom_line() + facet_wrap(~Year)
 ```
+
 ### Based on this graph, what conclusion can we make?
+
 The real reason why Asia has the highest total deaths.
 
 ## Death Rates Over Time Based in Continents
+
 ```{r, echo = FALSE, warning = FALSE, message = FALSE}
 ntrl_deaths %>% 
   group_by(Continent, Year) %>% 
@@ -174,7 +178,7 @@ Avg.DthRt.Continent %>% ggplot(aes(x = Year,
 If we compare every continents death rates over the year, we may see africa has the highest percentages compared to other continents, but thats not all we see.
 
 ---
->>>>>>> 14eef85d6b2b3b4ddad3496470a00b3cb4f24a01
+
 ```{r}
 disease_country_count <- death_ds %>%
   pivot_longer(
@@ -192,7 +196,9 @@ disease_country_count <- death_ds %>%
 
 disease_country_count
 ```
+
 The above information shows which diseases effected the most countries. Below I found which diease effected the most countries and which effected the least.This could help by putting this into anotther study to find which disease should possoibly be researched more to find a possible cure. 
+
 ```{r}
 most_affected <- disease_country_count %>%
   slice_max(Countries.Affected, n = 1)
