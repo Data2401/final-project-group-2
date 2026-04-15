@@ -1,10 +1,10 @@
 ---
-title: "Cause_o_Death"
+title: "Cause_of_Death"
+author: "Jorge Alejandro, Mia Alanis, Bryce Borak"
 output: slidy_presentation
-author: Jorge Alejandro, Mia Alanis, Bryce Borak
 ---
 
-```{r, echo = FALSE, warning = FALSE, message = FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(shiny)
 
@@ -39,8 +39,6 @@ library(shiny)
 ## Our Data
 Our data come from Kaggle. "Cause of Deaths" and "World Population", both CSV data sets.
 
-Whyd we choose this data and what are we hoping to learn from it?
-
 ## What is Shown in our Data Set
 ```{r}
 tibble(dth_pplt_ds)
@@ -51,6 +49,7 @@ tibble(dth_pplt_ds)
 ```{r, echo = FALSE, warning = FALSE}
 print(colnames(dth_pplt_ds)[5:34])
 ```
+
 ## What Can we Learn with Our Data
 Our main focus is the "Cause of Deaths Data set", So where does the "World Population" data set come into play?
 
@@ -58,12 +57,9 @@ How are we using both these data set and what can we learn?
 
 - Continents and countries
 - Population and how we calculate "Death rate"
-- As the years go by, population increases. DOes this affect the death rate significantly?
+- As the years go by, population increases. Does this affect the death rate significantly?
+- Which diesease effects the most countries 
 
-## 
-```{r, echo = FALSE, warning = FALSE, message = FALSE}
-#Lets filter our data further.
-non_diseases <- c("Drowning", "Interpersonal.Violence", "Drug.Use.Disorders", "Alcohol.Use.Disorders", "Self.harm", "Exposure.to.Forces.of.Nature", "Environmental.Heat.and.Cold.Exposure", "Conflict.and.Terrorism", "Road.Injuries", "Poisonings", "Fire..Heat..and.Hot.Substances", "Maternal.Disorders")
 
 dth_pplt_ds %>% 
   select(-c(non_diseases, Total.Death, Crude.Death.Rate)) -> ntrl_deaths
@@ -77,19 +73,54 @@ ntrl_deaths %>% group_by(Continent) %>%
   summarise(Highest_Death_Continent = max(Total.Deaths))
 
 ntrl_deaths %>% ggplot(aes(x = Continent, y = Total.Deaths)) + geom_boxplot() + scale_y_log10() + facet_wrap(~Year)
+---
+```{r}
+disease_country_count <- death_ds %>%
+  pivot_longer(
+    cols = -c(Country.Territory, Code, Year, Total.Death),
+    names_to = "Disease",
+    values_to = "Deaths"
+  ) %>%
+  filter(Deaths > 0) %>%
+  group_by(Disease) %>%
+  summarize(
+    Countries.Affected = n_distinct(Country.Territory),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(Countries.Affected))
+
+disease_country_count
+```
+The above information shows which diseases effected the most countries. Below I found which diease effected the most countries and which effected the least.This could help by putting this into anotther study to find which disease should possoibly be researched more to find a possible cure. 
+```{r}
+most_affected <- disease_country_count %>%
+  slice_max(Countries.Affected, n = 1)
+
+least_affected <- disease_country_count %>%
+  slice_min(Countries.Affected, n = 1)
+
+most_affected
+least_affected
+```
+```{r}
+disease_totals <- death_ds %>%
+  pivot_longer(
+    cols = -c(Country.Territory, Code, Year, Total.Death),
+    names_to = "Disease",
+    values_to = "Deaths"
+  ) %>%
+  group_by(Disease) %>%
+  summarize(
+    Total.Deaths = sum(Deaths, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  filter(Total.Deaths > 0) %>%
+  arrange(desc(Total.Deaths))
 ```
 
 
-
-
-
-
-
-
-```{r, echo = FALSE}
-
+```{r}
+disease_totals %>% arrange(desc(Total.Deaths)) %>% slice(1)
+disease_totals %>% arrange(Total.Deaths) %>% slice(1)
 ```
-
-## What countries would require the most medical funding and research?
-
 
