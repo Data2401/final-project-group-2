@@ -7,6 +7,7 @@ output: slidy_presentation
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(shiny)
+library(knitr)
 
 #setting up the datasets we will be using for our projects
   death_ds <- read.csv("cause_of_deaths.csv")
@@ -47,7 +48,33 @@ tibble(dth_pplt_ds)
 ## What Makes up the Majority of Our Columns?
 ### Our dataset show various different death causes, both natural and unnatural.
 ```{r, echo = FALSE, warning = FALSE}
-print(colnames(dth_pplt_ds)[5:34])
+all_cause_cols <- colnames(dth_pplt_ds)[5:34]
+
+non_diseases <- c("Drowning", "Interpersonal.Violence", "Drug.Use.Disorders", "Alcohol.Use.Disorders", "Self.harm", "Exposure.to.Forces.of.Nature", "Environmental.Heat.and.Cold.Exposure", "Conflict.and.Terrorism", "Road.Injuries", "Poisonings", "Fire..Heat..and.Hot.Substances", "Maternal.Disorders")
+
+clean_non_diseases <- str_replace_all(non_diseases, "\\.", " ")
+
+disease_cols <- setdiff(all_cause_cols, non_diseases)
+
+clean_diseases_cols <- str_replace_all(disease_cols, "\\.", " ")
+
+#this is to create a table to show both diseases and non-diseases
+max_ln <- max(length(clean_diseases_cols) , length(clean_non_diseases))
+
+comparison_table <- data.frame(
+  Disease_Causes = c(clean_diseases_cols, rep(NA, max_ln - length(clean_diseases_cols))),
+  Non_Disease_Causes = c(clean_non_diseases, rep(NA, max_ln - length(clean_non_diseases)))
+)
+
+comparison_table[is.na(comparison_table)] <- ""
+
+death_table <- kable(comparison_table, caption = "Classification of Death Causes")
+
+```
+
+```{r}
+death_table
+
 ```
 
 ## What Can we Learn with Our Data
@@ -60,6 +87,7 @@ How are we using both these data set and what can we learn?
 - As the years go by, population increases. Does this affect the death rate significantly?
 - Which diesease effects the most countries 
 
+```{r echo=FALSE, warning = FALSE}
 
 dth_pplt_ds %>% 
   select(-c(non_diseases, Total.Death, Crude.Death.Rate)) -> ntrl_deaths
@@ -67,13 +95,16 @@ dth_pplt_ds %>%
 ntrl_deaths %>% 
   mutate(Total.Deaths = rowSums(ntrl_deaths[, 4:22], na.rm = TRUE), 
          Crude.Death.Rate = (Total.Deaths/Population)/100) -> ntrl_deaths
+```
 
-#Now we can try to find what continent has the highest number of deaths
+## Now we can try to find what continent has the highest number of deaths
+```{r echo=FALSE}
 ntrl_deaths %>% group_by(Continent) %>% 
   summarise(Highest_Death_Continent = max(Total.Deaths))
 
 ntrl_deaths %>% ggplot(aes(x = Continent, y = Total.Deaths)) + geom_boxplot() + scale_y_log10() + facet_wrap(~Year)
----
+```
+
 ```{r}
 disease_country_count <- death_ds %>%
   pivot_longer(
