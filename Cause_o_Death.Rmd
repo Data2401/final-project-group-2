@@ -182,7 +182,8 @@ ntrl_deaths %>%
 
 Avg.DthRt.Continent %>% ggplot(aes(x = Year, 
                                    y = Average.Death.Rate, 
-                                   color = Continent)) + geom_line()
+                                   color = Continent)) + 
+                                 geom_line() + labs(title = "Death Rates Throughout the Years", x = "Year", y = "Death rates per 1000")
 ```
 
 We could choose Asia based on their total deaths, but...?
