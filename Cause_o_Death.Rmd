@@ -9,6 +9,7 @@ library(tidyverse)
 library(shiny)
 library(knitr)
 library(ggplot2)
+library(kableExtra)
 
 #setting up the datasets we will be using for our projects
   death_ds <- read.csv("cause_of_deaths.csv")
@@ -231,5 +232,18 @@ disease_totals <- death_ds %>%
 ```{r}
 disease_totals %>% arrange(desc(Total.Deaths)) %>% slice(1)
 disease_totals %>% arrange(Total.Deaths) %>% slice(1)
+```
+
+```{r}
+#code with all disease over the year from the other graph
+#ggplot(combined_disease_data, aes(x = Year, y = Deaths, color = Disease, group = Disease)) +
+  #geom_line(linewidth = 1) +
+  #geom_point() +
+  #scale_y_continuous(labels = label_comma()) +
+  #theme_minimal() +
+  #labs(title = "Total Deaths by Disease (1990-2015)",
+       #x = "Year",
+       #y = "Total Global Deaths")
+
 ```
 

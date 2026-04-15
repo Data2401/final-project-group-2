@@ -797,6 +797,15 @@ a possible cure.</p>
 ##   Disease                              Total.Deaths
 ##   &lt;chr&gt;                                       &lt;int&gt;
 ## 1 Environmental.Heat.and.Cold.Exposure       230861</code></pre>
+<div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="co">#code with all disease over the year from the other graph</span></span>
+<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a><span class="co">#ggplot(combined_disease_data, aes(x = Year, y = Deaths, color = Disease, group = Disease)) +</span></span>
+<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a>  <span class="co">#geom_line(linewidth = 1) +</span></span>
+<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a>  <span class="co">#geom_point() +</span></span>
+<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a>  <span class="co">#scale_y_continuous(labels = label_comma()) +</span></span>
+<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a>  <span class="co">#theme_minimal() +</span></span>
+<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a>  <span class="co">#labs(title = &quot;Total Deaths by Disease (1990-2015)&quot;,</span></span>
+<span id="cb18-8"><a href="#cb18-8" tabindex="-1"></a>       <span class="co">#x = &quot;Year&quot;,</span></span>
+<span id="cb18-9"><a href="#cb18-9" tabindex="-1"></a>       <span class="co">#y = &quot;Total Global Deaths&quot;)</span></span></code></pre></div>
 </div>
 
   <!-- dynamically load mathjax for compatibility with self-contained -->
