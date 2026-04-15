@@ -40,9 +40,11 @@ non_diseases <- c("Drowning", "Interpersonal.Violence", "Drug.Use.Disorders", "A
 ```
 
 ## Our Data
+
 Our data come from Kaggle. "Cause of Deaths" and "World Population", both CSV data sets.
 
 ## What is Shown in our Data Set
+
 ```{r}
 tibble(dth_pplt_ds)
 ```
@@ -140,7 +142,6 @@ ntrl_deaths %>%
 Lets look deeper as to why this is.
 ```{r, echo = FALSE, message = FALSE, warning = FALSE}
 ntrl_deaths %>% group_by(Continent) %>% 
-  filter(Year == 2000) %>%
   summarise(Average.Death.Rate = mean(Crude.Death.Rate))
 
 ```
@@ -156,7 +157,7 @@ ntrl_deaths %>% group_by(Continent) %>%
 ntrl_deaths %>% ggplot(aes(x = Population, 
                            y = Total.Deaths, 
                            color = Continent)) + 
-  geom_line() + facet_wrap(~Year)
+  geom_point() + scale_x_log10() + scale_y_log10() + facet_wrap(~Year)
 ```
 
 ### Based on this graph, what conclusion can we make?
@@ -175,6 +176,7 @@ Avg.DthRt.Continent %>% ggplot(aes(x = Year,
                                    y = Average.Death.Rate, 
                                    color = Continent)) + geom_line()
 ```
+
 If we compare every continents death rates over the year, we may see africa has the highest percentages compared to other continents, but thats not all we see.
 
 ---
