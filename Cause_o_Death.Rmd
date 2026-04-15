@@ -4,15 +4,13 @@ author: "Jorge Alejandro, Mia Alanis, Bryce Borak"
 output: slidy_presentation
 ---
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 library(tidyverse)
 library(shiny)
 
 #setting up the datasets we will be using for our projects
   death_ds <- read.csv("cause_of_deaths.csv")
   popu_ds <- read.csv("world_population.csv")
-  
-  #The issue im having now is that ive realized that the years in the population data set are columns and the year in the deaths data set are rows. Im trying to figure out a way where we can have the population info combine with the death data set if the years match up, might have to be a question for the professor)
 
 #Im going to add other columns that include things such as "Total recorded deaths" and a calculation for the crude death rate.
   death_ds %>% mutate(Total.Death = rowSums(death_ds[, -c(1:3)], na.rm = TRUE)) -> death_ds
@@ -35,6 +33,8 @@ library(shiny)
 #We might also want to use the numbers of the death rate of a population so im going to mutate the dataset to have that in the final column
   
   dth_pplt_ds %>% mutate(Crude.Death.Rate = (Total.Death / Population) * 1000, .after = "Total.Death") -> dth_pplt_ds
+  
+non_diseases <- c("Drowning", "Interpersonal.Violence", "Drug.Use.Disorders", "Alcohol.Use.Disorders", "Self.harm", "Exposure.to.Forces.of.Nature", "Environmental.Heat.and.Cold.Exposure", "Conflict.and.Terrorism", "Road.Injuries", "Poisonings", "Fire..Heat..and.Hot.Substances", "Maternal.Disorders")
 ```
 ## Our Data
 Our data come from Kaggle. "Cause of Deaths" and "World Population", both CSV data sets.
@@ -60,19 +60,57 @@ How are we using both these data set and what can we learn?
 - As the years go by, population increases. Does this affect the death rate significantly?
 - Which diesease effects the most countries 
 
+## Continents with the Most Deaths
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
 
 dth_pplt_ds %>% 
   select(-c(non_diseases, Total.Death, Crude.Death.Rate)) -> ntrl_deaths
 
 ntrl_deaths %>% 
   mutate(Total.Deaths = rowSums(ntrl_deaths[, 4:22], na.rm = TRUE), 
-         Crude.Death.Rate = (Total.Deaths/Population)/100) -> ntrl_deaths
+         Crude.Death.Rate = (Total.Deaths/Population)*1000) -> ntrl_deaths
 
 #Now we can try to find what continent has the highest number of deaths
 ntrl_deaths %>% group_by(Continent) %>% 
   summarise(Highest_Death_Continent = max(Total.Deaths))
 
-ntrl_deaths %>% ggplot(aes(x = Continent, y = Total.Deaths)) + geom_boxplot() + scale_y_log10() + facet_wrap(~Year)
+ntrl_deaths %>% ggplot(aes(x = Continent, 
+                           y = Total.Deaths, 
+                           color = Continent)) + geom_boxplot() + 
+  scale_y_log10() + 
+  facet_wrap(~Year)
+```
+
+## Continents with the Most Deaths
+
+  If we look at the graph, we notice that the continent of Asia has the most death throughout the 4 years.
+  
+### Why is this?
+
+Lets look deeper as to why this is.
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+ntrl_deaths %>% group_by(Continent) %>% 
+  filter(Year == 2000) %>%
+  summarise(Average.Death.Rate = mean(Crude.Death.Rate))
+
+```
+  The data here shows that the average death rate in higher in Africa. But how is this when more people die in total in Asia. To understand this, lets learn about the values
+  
+- what is crude death rate?
+-what does it mean for asia and their deaths?
+-How can we choose between these 2 continents?
+
+---
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+ntrl_deaths %>% ggplot(aes(x = Population, 
+                           y = Total.Deaths, 
+                           color = Continent)) + 
+  geom_line() + facet_wrap(~Year)
+```
+Based on this graph, what conclusion can we make?
+
+
+
 ---
 ```{r}
 disease_country_count <- death_ds %>%
