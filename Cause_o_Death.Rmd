@@ -10,6 +10,7 @@ library(shiny)
 library(knitr)
 library(ggplot2)
 library(kableExtra)
+library(stringr)
 
 #setting up the datasets we will be using for our projects
   death_ds <- read.csv("cause_of_deaths.csv")
@@ -37,24 +38,45 @@ library(kableExtra)
   
   dth_pplt_ds %>% mutate(Crude.Death.Rate = (Total.Death / Population) * 1000, .after = "Total.Death") -> dth_pplt_ds
   
-non_diseases <- c("Drowning", "Interpersonal.Violence", "Drug.Use.Disorders", "Alcohol.Use.Disorders", "Self.harm", "Exposure.to.Forces.of.Nature", "Environmental.Heat.and.Cold.Exposure", "Conflict.and.Terrorism", "Road.Injuries", "Poisonings", "Fire..Heat..and.Hot.Substances", "Maternal.Disorders")
 ```
 
 ## Our Data
 
 Our data come from Kaggle. "Cause of Deaths" and "World Population", both CSV data sets.
 
-## What is Shown in our Data Set
+[World Population](https://www.kaggle.com/datasets/iamsouravbanerjee/world-population-dataset)
 
-```{r}
-tibble(dth_pplt_ds)
+[Causes of Death](https://www.kaggle.com/datasets/iamsouravbanerjee/cause-of-deaths-around-the-world)
+
+
+### A Glimpes of our Data
+
+```{r, echo=FALSE, fig.width=8, fig.height=15}
+dth_pplt_ds %>%
+  head(100) %>%
+  # Remove the comma from Year and format numbers
+  mutate(Year = as.character(Year),
+         across(where(is.numeric), ~scales::comma(.))) %>% 
+  kbl() %>%
+  kable_styling(
+    bootstrap_options = c("bordered", "condensed", "hover"), 
+    full_width = FALSE,  # This keeps the table from stretching
+    position = "center",  # Centers the smaller table on the page
+    font_size = 18    # Manually shrink the text size (default is usually 16)
+  ) %>%
+  row_spec(0, background = "steelblue", color = "white") %>%
+  # Explicitly set column widths to keep it "thin"
+  column_spec(1:ncol(dth_pplt_ds), border_left = TRUE, border_right = TRUE) %>% 
+  scroll_box(width = "1400px", height = "450px") # Set a fixed pixel width instead of 100%
 ```
 
-## What Makes up the Majority of Our Columns?
+## What is Shown in our Data Set
+
+### What Makes up the Majority of Our Columns?
 
 Our dataset show various different death causes, both natural and unnatural.
 
-```{r, echo = FALSE, warning = FALSE}
+```{r, echo = FALSE, warning = FALSE, fig.width=8, fig.height=13 }
 all_cause_cols <- colnames(dth_pplt_ds)[5:34]
 
 non_diseases <- c("Drowning", "Interpersonal.Violence", "Drug.Use.Disorders", "Alcohol.Use.Disorders", "Self.harm", "Exposure.to.Forces.of.Nature", "Environmental.Heat.and.Cold.Exposure", "Conflict.and.Terrorism", "Road.Injuries", "Poisonings", "Fire..Heat..and.Hot.Substances", "Maternal.Disorders")
@@ -65,7 +87,27 @@ disease_cols <- setdiff(all_cause_cols, non_diseases)
 
 clean_diseases_cols <- str_replace_all(disease_cols, "\\.", " ")
 
-#this is to create a table to show both diseases and non-diseases
+#this is just separating the columns with out the death types
+other_columns <- setdiff(colnames(dth_pplt_ds), all_cause_cols)
+
+clean_other_cols <- str_replace_all(other_columns, "\\.", " ")
+
+other_cols_table <- data.frame(
+  Other_Columns = clean_other_cols
+)
+
+max_ln_all <- max(length(clean_other_cols), 
+                  length(clean_diseases_cols), 
+                  length(clean_non_diseases))
+
+#this is creating the combined data frame
+combined_dictionary <- data.frame(
+  Other_Columns = c(clean_other_cols, rep("", max_ln_all - length(clean_other_cols))),
+  Disease_Causes = c(clean_diseases_cols, rep("", max_ln_all - length(clean_diseases_cols))),
+  Non_Disease_Causes = c(clean_non_diseases, rep("", max_ln_all - length(clean_non_diseases)))
+)
+
+#this is to create a table to show both diseases and non-diseases but also the other columns
 max_ln <- max(length(clean_diseases_cols) , length(clean_non_diseases))
 
 comparison_table <- data.frame(
@@ -75,14 +117,24 @@ comparison_table <- data.frame(
 
 comparison_table[is.na(comparison_table)] <- ""
 
-death_table <- kable(comparison_table, caption = "Classification of Death Causes")
-
+#this create a better looking Table
+combined_dictionary %>%
+  kbl(col.names = c("Data Columns", "Diseases Columns", "Non-Disease Columns"),
+      caption = "Dataset Column Classification",
+      align = "lll") %>%
+  kable_styling(bootstrap_options = c("bordered", "condensed"), 
+                full_width = FALSE, 
+                position = "center",
+                font_size = 26) %>%
+  # Header Styling
+  row_spec(0, background = "steelblue", color = "white", bold = TRUE) %>%
+  # Column Boxing and Widths
+  column_spec(1, border_left = TRUE, border_right = TRUE, width = "15em", bold = TRUE) %>%
+  column_spec(2, border_right = TRUE, width = "18em") %>%
+  column_spec(3, border_right = TRUE, width = "18em") %>% 
+  scroll_box(width = "1400px", height = "550px")
 ```
 
-```{r}
-death_table
-
-```
 
 ## What Can we Learn with Our Data
 
@@ -121,20 +173,41 @@ Things to consider
 ## Lets find what continents have the highest deaths
 
 ```{r echo=FALSE}
-ntrl_deaths %>% group_by(Continent) %>% 
-  summarise(Highest_Death_Continent = max(Total.Deaths))
+table_summary <- ntrl_deaths %>% 
+  group_by(Continent) %>% 
+  summarise(Highest_Death_Count = max(Total.Deaths, na.rm = TRUE)) %>%
+  arrange(desc(Highest_Death_Count)) # Sorts highest to lowest
 
+#creates a nice table
+table_summary %>%
+  mutate(Highest_Death_Count = scales::comma(Highest_Death_Count)) %>%
+  kbl(col.names = c("Continent", "Highest Single-Year Total"),
+      caption = "Peak Natural Mortality Records by Continent") %>%
+  kable_styling(bootstrap_options = c("striped", "hover"), 
+                full_width = F, 
+                position = "left") %>%
+  # Header: Navy Blue with White Text
+  row_spec(0, background = "#2C3E50", color = "white", bold = TRUE) %>%
+  # Highlight the Data Column: Light Blue background
+  column_spec(2, background = "#F0F7FB", color = "#2E4053", bold = TRUE) %>%
+  # Add a border to separate columns
+  column_spec(1, border_right = TRUE, bold = TRUE)
+
+#a more better looking bar graph
 ntrl_deaths %>% 
-  ggplot(aes(x = Continent, y = Total.Deaths, fill = Continent)) + 
-  geom_boxplot(outlier.alpha = 0.5) + # Makes outliers slightly transparent
-  scale_y_log10(labels = scales::comma) + # Changes scientific notation to regular numbers
+  ggplot(aes(x = reorder(Continent, Total.Deaths, FUN = median), 
+             y = Total.Deaths, 
+             fill = factor(Year))) + # This gives each year a different color
+  geom_boxplot(alpha = 0.7, outlier.color = "red") + 
+  scale_y_log10(labels = scales::comma) + 
   facet_wrap(~Year) + 
-  theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1)) + # Tilts text so names don't overlap
-  labs(title = "Distribution of Natural Deaths by Continent",
-       y = "Total Deaths (Log Scale)",
-       x = "") +
-  guides(fill = "none")
+  theme_bw() +
+  labs(title = "Natural Deaths by Continent", 
+       subtitle = "Color-coded by Year",
+       y = "Deaths (Log Scale)", x = "") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  guides(fill = "none") # Hides the legend since the facet labels already show the year
+
 
 ```
 
@@ -257,6 +330,7 @@ disease_totals %>% arrange(Total.Deaths) %>% slice(1)
   #labs(title = "Total Deaths by Disease (1990-2015)",
        #x = "Year",
        #y = "Total Global Deaths")
+
 
 ```
 
