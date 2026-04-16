@@ -37,19 +37,33 @@ library(stringr)
 #We might also want to use the numbers of the death rate of a population so im going to mutate the dataset to have that in the final column
   
   dth_pplt_ds %>% mutate(Crude.Death.Rate = (Total.Death / Population) * 1000, .after = "Total.Death") -> dth_pplt_ds
-  
+
 ```
 
 ## Our Data
 
-Our data come from Kaggle. "Cause of Deaths" and "World Population", both CSV data sets.
+<div style="float: left; width: 45%; border-right: 2px solid steelblue; padding-right: 20%;">
+### **Raw Input**
+**World Population**
+* 234 Rows |    17 Columns
+* [Source Link](https://www.kaggle.com/datasets/iamsouravbanerjee/world-population-dataset)
 
-[World Population](https://www.kaggle.com/datasets/iamsouravbanerjee/world-population-dataset)
+**Causes of Death**
+* 6,120 Rows |  34 Columns
+* [Source Link](https://www.kaggle.com/datasets/iamsouravbanerjee/cause-of-deaths-around-the-world)
+</div>
 
-[Causes of Death](https://www.kaggle.com/datasets/iamsouravbanerjee/cause-of-deaths-around-the-world)
+<div style="float: right; width: 45%; color: midnightblue;">
+### **Final Data Set**
+* **796** Rows
+* **45** Columns
 
-
-### A Glimpes of our Data
+**Key Operations:**
+1. **Filter:** Decadal years (1970-2022)
+2. **Pivot:** Population into long format
+3. **Join:** Inner join by Country/Year
+4. **Mutate:** Added Crude Death Rate
+</div>
 
 ```{r, echo=FALSE, fig.width=8, fig.height=15}
 dth_pplt_ds %>%
@@ -67,7 +81,7 @@ dth_pplt_ds %>%
   row_spec(0, background = "steelblue", color = "white") %>%
   # Explicitly set column widths to keep it "thin"
   column_spec(1:ncol(dth_pplt_ds), border_left = TRUE, border_right = TRUE) %>% 
-  scroll_box(width = "1400px", height = "450px") # Set a fixed pixel width instead of 100%
+  scroll_box(width = "1400px", height = "350px") # Set a fixed pixel width instead of 100%
 ```
 
 ## What is Shown in our Data Set

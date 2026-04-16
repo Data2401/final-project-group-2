@@ -1559,14 +1559,25 @@ Jorge Alejandro, Mia Alanis, Bryce Borak
 </div>
 <div id="our-data" class="slide section level2">
 <h1>Our Data</h1>
-<p>Our data come from Kaggle. “Cause of Deaths” and “World Population”,
-both CSV data sets.</p>
-<p><a href="https://www.kaggle.com/datasets/iamsouravbanerjee/world-population-dataset">World
-Population</a></p>
-<p><a href="https://www.kaggle.com/datasets/iamsouravbanerjee/cause-of-deaths-around-the-world">Causes
-of Death</a></p>
-<h3 id="a-glimpes-of-our-data">A Glimpes of our Data</h3>
-<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:450px; overflow-x: scroll; width:1400px; ">
+<div id="raw-input" style="float: left; width: 45%; border-right: 2px solid steelblue; padding-right: 20%;">
+<h3><strong>Raw Input</strong></h3>
+<p><strong>World Population</strong> * 234 Rows | 17 Columns * <a href="https://www.kaggle.com/datasets/iamsouravbanerjee/world-population-dataset">Source
+Link</a></p>
+<p><strong>Causes of Death</strong> * 6,120 Rows | 34 Columns * <a href="https://www.kaggle.com/datasets/iamsouravbanerjee/cause-of-deaths-around-the-world">Source
+Link</a></p>
+</div>
+<div id="final-data-set" style="float: right; width: 45%; color: midnightblue;">
+<h3><strong>Final Data Set</strong></h3>
+<ul>
+<li><strong>796</strong> Rows</li>
+<li><strong>45</strong> Columns</li>
+</ul>
+<p><strong>Key Operations:</strong> 1. <strong>Filter:</strong> Decadal
+years (1970-2022) 2. <strong>Pivot:</strong> Population into long format
+3. <strong>Join:</strong> Inner join by Country/Year 4.
+<strong>Mutate:</strong> Added Crude Death Rate</p>
+</div>
+<div style="border: 1px solid #ddd; padding: 0px; overflow-y: scroll; height:350px; overflow-x: scroll; width:1400px; ">
 <table class="table table-bordered table-condensed table-hover" style="font-size: 18px; width: auto !important; margin-left: auto; margin-right: auto;">
 <thead>
 <tr>
