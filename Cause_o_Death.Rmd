@@ -42,28 +42,22 @@ library(stringr)
 
 ## Our Data
 
-<div style="float: left; width: 45%; border-right: 2px solid steelblue; padding-right: 20%;">
+::: {style="float: left; width: 45%; border-right: 2px solid steelblue; padding-right: 20%;"}
 ### **Raw Input**
-**World Population**
-* 234 Rows |    17 Columns
-* [Source Link](https://www.kaggle.com/datasets/iamsouravbanerjee/world-population-dataset)
 
-**Causes of Death**
-* 6,120 Rows |  34 Columns
-* [Source Link](https://www.kaggle.com/datasets/iamsouravbanerjee/cause-of-deaths-around-the-world)
-</div>
+**World Population** \* 234 Rows \| 17 Columns \* [Source Link](https://www.kaggle.com/datasets/iamsouravbanerjee/world-population-dataset)
 
-<div style="float: right; width: 45%; color: midnightblue;">
+**Causes of Death** \* 6,120 Rows \| 34 Columns \* [Source Link](https://www.kaggle.com/datasets/iamsouravbanerjee/cause-of-deaths-around-the-world)
+:::
+
+::: {style="float: right; width: 45%; color: midnightblue;"}
 ### **Final Data Set**
-* **796** Rows
-* **45** Columns
 
-**Key Operations:**
-1. **Filter:** Decadal years (1970-2022)
-2. **Pivot:** Population into long format
-3. **Join:** Inner join by Country/Year
-4. **Mutate:** Added Crude Death Rate
-</div>
+-   **796** Rows
+-   **45** Columns
+
+**Key Operations:** 1. **Filter:** Decadal years (1970-2022) 2. **Pivot:** Population into long format 3. **Join:** Inner join by Country/Year 4. **Mutate:** Added Crude Death Rate
+:::
 
 ```{r, echo=FALSE, fig.width=8, fig.height=15}
 dth_pplt_ds %>%
@@ -149,17 +143,32 @@ combined_dictionary %>%
   scroll_box(width = "1400px", height = "550px")
 ```
 
+------------------------------------------------------------------------
 
-## What Can we Learn with Our Data
+::: {style="float: left; width: 48%; padding-top: 20px;"}
+### **The Data Collaboration**
 
-Our main focus is the "Cause of Deaths Data set", So where does the "World Population" data set come into play?
+The **"Cause of Deaths"** dataset provides the *counts*, but the **"World Population"** dataset provides the *context*.
 
-How are we using both these data set and what can we learn?
+By merging them, we move from raw totals to meaningful **rates**. This allows us to answer not just *"how many died?"*, but *"how heavily was the population actually impacted?"*
+:::
 
-- Learning what continent get affected the most by diseases
-- Using population and death to calculate "Death rate"
-- As the years go by, population increases. Whats the relationship with the death rate?
-- Which diseases effects the most countries 
+::: {style="float: right; width: 45%; background-color: #F0F8FF; padding: 25px; border-radius: 12px; border: 3px solid #4682B4; color: #191970;"}
+### **Our Core Questions**
+
+-   **Regional Burden** Which continents face the heaviest impact from biological diseases?
+
+-   **Fair Comparison** How do we level the playing field between small nations and global giants?
+
+-   **Trends Over Time** How has the relationship between population growth and mortality evolved from 1990 to 2015?
+
+-   **Global Reach** Which specific diseases are the most widespread across international borders?
+:::
+
+::: {style="clear: both;"}
+:::
+
+------------------------------------------------------------------------
 
 ```{r echo=FALSE, warning = FALSE}
 ## Continents with the Most Deaths
@@ -181,8 +190,8 @@ Lets say we were an organization with funding to be able to invest in a country 
 
 Things to consider
 
-- Continents population and death
-- Continents crude death rate and how is their death rate trending?
+-   Continents population and death
+-   Continents crude death rate and how is their death rate trending?
 
 ## Lets find what continents have the highest deaths
 
@@ -201,9 +210,9 @@ table_summary %>%
                 full_width = F, 
                 position = "left") %>%
   # Header: Navy Blue with White Text
-  row_spec(0, background = "#2C3E50", color = "white", bold = TRUE) %>%
+  row_spec(0, background = "midnightblue", color = "white", bold = TRUE) %>%
   # Highlight the Data Column: Light Blue background
-  column_spec(2, background = "#F0F7FB", color = "#2E4053", bold = TRUE) %>%
+  column_spec(2, background = "#F0F7FB", color = "midnightblue", bold = TRUE) %>%
   # Add a border to separate columns
   column_spec(1, border_right = TRUE, bold = TRUE)
 
@@ -227,24 +236,25 @@ ntrl_deaths %>%
 
 ## Continents with the Most Deaths
 
-  If we look at the graph, we notice that the continent of Asia has the most death throughout the 4 years.
-  
+If we look at the graph, we notice that the continent of Asia has the most death throughout the 4 years.
+
 ### Why is this?
 
 Lets look deeper as to why this is.
+
 ```{r, echo = FALSE, message = FALSE, warning = FALSE}
 ntrl_deaths %>% group_by(Continent) %>% 
   summarise(Average.Death.Rate = mean(Crude.Death.Rate))
 
 ```
-  
-  The data here shows that the average death rate in higher in Africa. But how is this when there are morepe total deaths in Asia. To understand this, lets learn about the values
-  
-- what is crude death rate?
-- what does it mean for Asia and their deaths?
-- How can we choose between these 2 continents?
 
----
+The data here shows that the average death rate in higher in Africa. But how is this when there are morepe total deaths in Asia. To understand this, lets learn about the values
+
+-   what is crude death rate?
+-   what does it mean for Asia and their deaths?
+-   How can we choose between these 2 continents?
+
+------------------------------------------------------------------------
 
 ```{r, echo = FALSE, message = FALSE, warning = FALSE}
 ntrl_deaths %>% ggplot(aes(x = Population, 
@@ -252,7 +262,6 @@ ntrl_deaths %>% ggplot(aes(x = Population,
                            color = Continent)) + 
   geom_point() + scale_x_log10() + scale_y_log10() + facet_wrap(~Year)
 ```
-
 
 ### Based on this graph, what conclusion can we make?
 
@@ -300,7 +309,7 @@ disease_country_count <- death_ds %>%
 disease_country_count
 ```
 
-The above information shows which diseases effected the most countries. Below I found which diease effected the most countries and which effected the least.This could help by putting this into anotther study to find which disease should possoibly be researched more to find a possible cure. 
+The above information shows which diseases effected the most countries. Below I found which diease effected the most countries and which effected the least.This could help by putting this into anotther study to find which disease should possoibly be researched more to find a possible cure.
 
 ```{r}
 most_affected <- disease_country_count %>%
@@ -312,6 +321,7 @@ least_affected <- disease_country_count %>%
 most_affected
 least_affected
 ```
+
 ```{r}
 disease_totals <- death_ds %>%
   pivot_longer(
@@ -327,7 +337,6 @@ disease_totals <- death_ds %>%
   filter(Total.Deaths > 0) %>%
   arrange(desc(Total.Deaths))
 ```
-
 
 ```{r}
 disease_totals %>% arrange(desc(Total.Deaths)) %>% slice(1)
@@ -347,4 +356,3 @@ disease_totals %>% arrange(Total.Deaths) %>% slice(1)
 
 
 ```
-
