@@ -145,29 +145,38 @@ combined_dictionary %>%
 
 ------------------------------------------------------------------------
 
-::: {style="float: left; width: 48%; padding-top: 20px;"}
+::: {style="float: left; width: 48%; padding-top: 10px;"}
 ### **The Data Collaboration**
 
 The **"Cause of Deaths"** dataset provides the *counts*, but the **"World Population"** dataset provides the *context*.
 
-By merging them, we move from raw totals to meaningful **rates**. This allows us to answer not just *"how many died?"*, but *"how heavily was the population actually impacted?"*
+By merging them, we move from raw totals to meaningful **rates**. This allows us to answer not just *"how many died?"*, but **"how heavily was the population actually impacted?"**
+
+<br>
+
+### **The Investment Perspective**
+
+**Imagine we are a global healthcare fund.** How do we choose where to invest? 
+
+We don't just look at who has the most deaths; we analyze:
+- **The Crude Death Rate:** The true burden on the people.
+- **The Trend:** Is the crisis improving or worsening?
 :::
 
-::: {style="float: right; width: 45%; background-color: #F0F8FF; padding: 25px; border-radius: 12px; border: 3px solid #4682B4; color: #191970;"}
+::: {style="float: right; width: 45%; background-color: #F0F8FF; padding: 10px; border-radius: 12px; border: 2px solid #4682B4; color: #191970;"}
 ### **Our Core Questions**
 
--   **Regional Burden** Which continents face the heaviest impact from biological diseases?
+- **Regional Burden** Which continents face the heaviest impact from biological diseases?
 
--   **Fair Comparison** How do we level the playing field between small nations and global giants?
 
--   **Trends Over Time** How has the relationship between population growth and mortality evolved from 1990 to 2015?
+- **Fair Comparison** How do we level the playing field between small nations and global giants?
 
--   **Global Reach** Which specific diseases are the most widespread across international borders?
+
+- **Trends Over Time** How has the relationship between population and mortality evolved?
+
+
+- **Global Reach** Which specific diseases are the most widespread across international borders?
 :::
-
-::: {style="clear: both;"}
-:::
-
 ------------------------------------------------------------------------
 
 ```{r echo=FALSE, warning = FALSE}
@@ -182,18 +191,10 @@ ntrl_deaths %>%
 
 ```
 
-## Lets Use our Data
 
-Lets say we were an organization with funding to be able to invest in a country or continents health care. Where should we?
+## Regional Burden
 
-### How do we make this choice
-
-Things to consider
-
--   Continents population and death
--   Continents crude death rate and how is their death rate trending?
-
-## Lets find what continents have the highest deaths
+### Which continents face the heaviest impact from biological diseases?
 
 ```{r echo=FALSE}
 table_summary <- ntrl_deaths %>% 
@@ -234,7 +235,7 @@ ntrl_deaths %>%
 
 ```
 
-## Continents with the Most Deaths
+### Continents with the Most Deaths
 
 If we look at the graph, we notice that the continent of Asia has the most death throughout the 4 years.
 
@@ -256,6 +257,10 @@ The data here shows that the average death rate in higher in Africa. But how is 
 
 ------------------------------------------------------------------------
 
+## Fair Comparison
+
+### How do we level the playing field between small nations and global giants?
+
 ```{r, echo = FALSE, message = FALSE, warning = FALSE}
 ntrl_deaths %>% ggplot(aes(x = Population, 
                            y = Total.Deaths, 
@@ -269,7 +274,7 @@ The real reason why Asia has the highest total deaths. This graph says "more peo
 
 Asia has more people overall, so its a given that theyll have more deaths overall.
 
-## Death Rates Over Time Based in Continents
+### Death Rates Over Time Based in Continents
 
 ```{r, echo = FALSE, warning = FALSE, message = FALSE}
 ntrl_deaths %>% 
@@ -343,16 +348,10 @@ disease_totals %>% arrange(desc(Total.Deaths)) %>% slice(1)
 disease_totals %>% arrange(Total.Deaths) %>% slice(1)
 ```
 
-```{r}
-#code with all disease over the year from the other graph
-#ggplot(combined_disease_data, aes(x = Year, y = Deaths, color = Disease, group = Disease)) +
-  #geom_line(linewidth = 1) +
-  #geom_point() +
-  #scale_y_continuous(labels = label_comma()) +
-  #theme_minimal() +
-  #labs(title = "Total Deaths by Disease (1990-2015)",
-       #x = "Year",
-       #y = "Total Global Deaths")
+## Trends Over Time
 
+### How has the relationship between population and mortality evolved?
 
-```
+## Global Reach
+
+### Which specific diseases are the most widespread across international borders?
