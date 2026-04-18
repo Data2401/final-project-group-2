@@ -534,3 +534,61 @@ ggplot(dot_plot_data, aes(x = Avg_Rate, y = reorder(Disease, Avg_Rate), color = 
 
 ---
 >>>>>>> 6865639d06f13a5dbecd4ca50347566a7238a862
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE}
+regional_summary <- dis_pop_ds %>%
+  filter(Year %in% c(1990, 2000, 2010, 2015)) %>%
+  pivot_longer(
+    cols = all_of(disease_cols),
+    names_to = "Disease",
+    values_to = "Death.Rate"
+  ) %>%
+  group_by(Continent, Disease) %>%
+  summarise(
+    Avg_Rate = mean(Death.Rate, na.rm = TRUE),
+    Max_Rate = max(Death.Rate, na.rm = TRUE),
+    Min_Rate = min(Death.Rate, na.rm = TRUE),
+    Regional_Gap = Max_Rate - Min_Rate,
+    .groups = "drop"
+  )
+```
+
+```{r}
+regional_summary %>%
+  group_by(Continent) %>%
+  summarise(Avg_Regional_Burden = mean(Avg_Rate, na.rm = TRUE), .groups = "drop") %>%
+  ggplot(aes(x = reorder(Continent, Avg_Regional_Burden), y = Avg_Regional_Burden, fill = Continent)) +
+  geom_col() +
+  coord_flip() +
+  theme_minimal() +
+  labs(title = "Average Disease Burden by Region",
+       x = "Continent",
+       y = "Average Death Rate") +
+  guides(fill = "none")
+```
+
+```{r}
+dis_pop_ds %>%
+  filter(Year %in% c(1990, 2000, 2010, 2015)) %>%
+  pivot_longer(
+    cols = all_of(disease_cols),
+    names_to = "Disease",
+    values_to = "Deaths"
+  ) %>%
+  filter(Deaths > 100) %>%  # removes tiny irrelevant values
+  group_by(Disease) %>%
+  summarise(Countries.Affected = n_distinct(Country.Territory), .groups = "drop") %>%
+  arrange(desc(Countries.Affected)) %>%
+  slice_head(n = 10) %>%
+  ggplot(aes(x = reorder(Disease, Countries.Affected), y = Countries.Affected)) +
+  geom_col(fill = "steelblue") +
+  geom_text(aes(label = Countries.Affected), hjust = -0.2, size = 5) +
+  coord_flip() +
+  theme_minimal() +
+  labs(title = "Most Widespread Diseases (Global Reach)",
+       subtitle = "Top 8 diseases by number of countries affected",
+       x = "Disease",
+       y = "Countries Affected") +
+  ylim(0, NA)
+```
+
