@@ -496,6 +496,8 @@ europe_ntrl_dths %>%
 
 ```
 
+## Diseases and Their Trends in Europe
+
 The above information shows which diseases effected the most countries in Europe. We should further investigate to see the trends of these diseases.
 
 ```{r, echo = FALSE, message = FALSE, warning = FALSE}
@@ -506,6 +508,14 @@ max_europe_ntrl_dths[[1]] -> disease_names
 
 ntrl_deaths %>% select(all_of(disease_names), Year, Continent) %>% filter(Continent == "Europe") -> for_graph
 
+for_graph %>% pivot_longer(
+  cols = all_of(disease_names),
+  names_to = "Disease",
+  values_to = "Deaths"
+) %>% 
+  group_by(Year, Continent, Disease) %>% summarise(Total_Deaths = sum(Deaths, na.rm = T), .groups = "drop") -> longer_for_graph
+
+longer_for_graph %>% ggplot(aes(x = Year, y = Total_Deaths, color = Disease)) + geom_line() + scale_y_log10()
 ```
 
 ```{r, echo = FALSE, message = FALSE, warning = FALSE}
