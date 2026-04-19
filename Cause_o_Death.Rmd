@@ -259,6 +259,45 @@ The data here shows that the average death rate in higher in Africa. But how is 
 
 ---
 
+## Fair Comparison
+
+### How do we level the playing field between small nations and global giants?
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+ntrl_deaths %>% ggplot(aes(x = Population, 
+                           y = Total.Deaths, 
+                           color = Continent)) + 
+  geom_point() + scale_x_log10() + scale_y_log10() + facet_wrap(~Year)
+```
+
+### Based on this graph, what conclusion can we make?
+
+The real reason why Asia has the highest total deaths. This graph says "more people equals more deaths". Whats the easiest conclusion for Asia?
+
+Asia has more people overall, so its a given that theyll have more deaths overall.
+
+### Death Rates Over Time Based in Continents
+
+```{r, echo = FALSE, warning = FALSE, message = FALSE}
+ntrl_deaths %>% 
+  group_by(Continent, Year) %>% 
+  summarise(Year, 
+            Average.Death.Rate = mean(Crude.Death.Rate)) -> Avg.DthRt.Continent
+
+Avg.DthRt.Continent %>% ggplot(aes(x = Year, 
+                                   y = Average.Death.Rate, 
+                                   color = Continent)) + 
+                                 geom_line() + labs(title = "Death Rates Throughout the Years", x = "Year", y = "Death rates per 1000")
+```
+
+We could choose Asia based on their total deaths, but...?
+
+what about Africa?
+
+Which continent should we actually choose?
+
+---
+
 ## Regional Burden
 
 ### Which continents face the heaviest impact from biological diseases?
@@ -360,47 +399,9 @@ We show deaths per 100,000 people so that large countries don't overshadow small
 :::
 ---
 
-## Fair Comparison
-
-### How do we level the playing field between small nations and global giants?
+## Diseases Affecting Different Countries
 
 ```{r, echo = FALSE, message = FALSE, warning = FALSE}
-ntrl_deaths %>% ggplot(aes(x = Population, 
-                           y = Total.Deaths, 
-                           color = Continent)) + 
-  geom_point() + scale_x_log10() + scale_y_log10() + facet_wrap(~Year)
-```
-
-### Based on this graph, what conclusion can we make?
-
-The real reason why Asia has the highest total deaths. This graph says "more people equals more deaths". Whats the easiest conclusion for Asia?
-
-Asia has more people overall, so its a given that theyll have more deaths overall.
-
-### Death Rates Over Time Based in Continents
-
-```{r, echo = FALSE, warning = FALSE, message = FALSE}
-ntrl_deaths %>% 
-  group_by(Continent, Year) %>% 
-  summarise(Year, 
-            Average.Death.Rate = mean(Crude.Death.Rate)) -> Avg.DthRt.Continent
-
-Avg.DthRt.Continent %>% ggplot(aes(x = Year, 
-                                   y = Average.Death.Rate, 
-                                   color = Continent)) + 
-                                 geom_line() + labs(title = "Death Rates Throughout the Years", x = "Year", y = "Death rates per 1000")
-```
-
-We could choose Asia based on their total deaths, but...?
-
-what about Africa?
-
-Which continent should we actually choose?
----
-
-## [Insert title]
-
-```{r}
 disease_country_count <- death_ds %>%
   pivot_longer(
     cols = -c(Country.Territory, Code, Year, Total.Death),
@@ -420,7 +421,7 @@ disease_country_count
 
 The above information shows which diseases effected the most countries. Below I found which diease effected the most countries and which effected the least.This could help by putting this into anotther study to find which disease should possoibly be researched more to find a possible cure.
 
-```{r}
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
 most_affected <- disease_country_count %>%
   slice_max(Countries.Affected, n = 1)
 
@@ -431,7 +432,7 @@ most_affected
 least_affected
 ```
 
-```{r}
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
 disease_totals <- death_ds %>%
   pivot_longer(
     cols = -c(Country.Territory, Code, Year, Total.Death),
@@ -447,7 +448,7 @@ disease_totals <- death_ds %>%
   arrange(desc(Total.Deaths))
 ```
 
-```{r}
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
 disease_totals %>% arrange(desc(Total.Deaths)) %>% slice(1)
 disease_totals %>% arrange(Total.Deaths) %>% slice(1)
 ```
