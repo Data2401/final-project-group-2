@@ -538,12 +538,6 @@ disease_totals <- death_ds %>%
 disease_totals %>% arrange(desc(Total.Deaths)) %>% slice(1)
 disease_totals %>% arrange(Total.Deaths) %>% slice(1)
 ```
----
-
-=======
-## Trends Over Time
-
-### How has the relationship between population and mortality evolved?
 
 ---
 

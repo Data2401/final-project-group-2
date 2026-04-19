@@ -16179,12 +16179,6 @@ these diseases.</p>
 </div>
 <div class="slide section level2">
 
-<p>======= ## Trends Over Time</p>
-<h3 id="how-has-the-relationship-between-population-and-mortality-evolved">How
-has the relationship between population and mortality evolved?</h3>
-</div>
-<div class="slide section level2">
-
 <div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>regional_summary <span class="sc">%&gt;%</span></span>
 <span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>  <span class="fu">group_by</span>(Continent) <span class="sc">%&gt;%</span></span>
 <span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">Avg_Regional_Burden =</span> <span class="fu">mean</span>(Avg_Rate, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">&quot;drop&quot;</span>) <span class="sc">%&gt;%</span></span>
