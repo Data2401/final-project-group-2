@@ -37,7 +37,7 @@ library(patchwork)
   
 #We might also want to use the numbers of the death rate of a population so im going to mutate the dataset to have that in the final column
   
-  dth_pplt_ds %>% mutate(Crude.Death.Rate = (Total.Death / Population) * 1000, .after = "Total.Death") -> dth_pplt_ds
+  dth_pplt_ds %>% mutate(Crude.Death.Rate = (Total.Death / Population) * 100, .after = "Total.Death") -> dth_pplt_ds
 
 ```
 
@@ -183,13 +183,16 @@ We don't just look at who has the most deaths; we analyze:
 ```{r echo=FALSE, warning = FALSE}
 ## Continents with the Most Deaths
 
-dth_pplt_ds %>% 
-  select(-c(non_diseases, Total.Death, Crude.Death.Rate)) -> ntrl_deaths
+ntrl_deaths <- dth_pplt_ds %>% 
+  select(-c(all_of(non_diseases), Total.Death, Crude.Death.Rate))
 
-ntrl_deaths %>% 
-  mutate(Total.Deaths = rowSums(ntrl_deaths[, 4:22], na.rm = TRUE), 
-         Crude.Death.Rate = (Total.Deaths/Population)/100) -> ntrl_deaths
-
+ntrl_deaths <- ntrl_deaths %>% 
+  mutate(
+    Total.Deaths = rowSums(across(all_of(disease_cols)), na.rm = TRUE), 
+    # Standard crude rate is usually per 1,000 or 100,000
+    # Your current (Total/Pop)/100 is essentially a percentage.
+    Crude.Death.Rate = (Total.Deaths / Population) * 100000
+  )
 ```
 
 ---
@@ -261,61 +264,63 @@ The data here shows that the average death rate in higher in Africa. But how is 
 ### Which continents face the heaviest impact from biological diseases?
 
 ```{r, echo=FALSE}
-dis_pop_ds <- dth_pplt_ds %>%  
-  mutate(Total.Disease.Deaths = rowSums(across(all_of(disease_cols)))) %>% 
-  select(-c(non_diseases, Code, Rank, CCA3, Capital, Density..per.km.., Growth.Rate, World.Population.Percentage, Area..km..))
-
-dis_pop_ds <- dis_pop_ds %>% 
+ntrl_deaths <- ntrl_deaths %>% 
+  select(-c(Code, Rank, CCA3, Capital, Density..per.km.., Growth.Rate, World.Population.Percentage, Area..km..))  %>% 
   relocate(Continent, .after = Country.Territory) %>% 
-  relocate(Total.Disease.Deaths, .after = Crude.Death.Rate)
+  relocate(Total.Deaths, .after = Acute.Hepatitis)
 
-#disease crude death rate
-dis_crude_rate <- dis_pop_ds %>%
-  group_by(Continent) %>%
-  summarize(
-    # name it clearly to distinguish it from the overall Crude Death Rate
-    Avg_Dis_Death_Rate = mean((Total.Disease.Deaths / Population) * 100000, na.rm = TRUE)
-  ) %>%
-  arrange(desc(Avg_Dis_Death_Rate))
-```
-
-```{r, echo=FALSE}
-# --- STEP 1: DATA PROCESSING (SILENT) ---
-# We save this to 'dis_pop_ds' so it doesn't print a tibble
-dis_pop_ds <- dth_pplt_ds %>%  
-  mutate(Total.Disease.Deaths = rowSums(across(all_of(disease_cols)))) %>% 
-  select(-c(all_of(non_diseases), Code, Rank, CCA3, Capital, 
-            matches("Density|Growth|Percentage|Area")))
-
-# Prepare the plot data object (SILENT)
-plot_data_100k <- dis_pop_ds %>%
+#Summarize with the Weighted Rate
+# We save this to a new object for your plot/table
+dis_crude_rate <- ntrl_deaths %>% 
   group_by(Continent, Year) %>%
   summarize(
-    Avg_Dis_Rate = mean((Total.Disease.Deaths / Population) * 100000, na.rm = TRUE),
+    # We must SUM the deaths and population for the continent
+    Total_Deaths_Continent = sum(Total.Deaths, na.rm = TRUE),
+    # Calculate the rate here so the next line can 'arrange' by it
+    Crude.Death.Rate = (Total_Deaths_Continent / sum(Population, na.rm = TRUE)) * 100000,
     .groups = "drop"
-  )
+  ) %>%
+  # Now arrange works because Crude.Death.Rate exists in this table
+  arrange(Year, desc(Crude.Death.Rate))
+
+#disease crude death rate
+dis_crude_rate <- ntrl_deaths %>%
+  group_by(Continent, Year) %>%
+  summarize(
+    # name it clearly to distinguish it from the overall Crude Death Rate
+    Avg_Dis_Death_Rate = mean((Total.Deaths / Population) * 100000, na.rm = TRUE)
+  , .groups = "drop" ) %>%
+  arrange(desc(Avg_Dis_Death_Rate))
+
 ```
+
 ::: {.columns}
 
 ::: {.column width="65%"}
 ```{r, echo=FALSE}
 # --- STEP 2: GRAPH RENDER ---
-ggplot(plot_data_100k, aes(x = reorder(Continent, -Avg_Dis_Rate), y = Avg_Dis_Rate)) +
-  geom_col(fill = "steelblue", color = "white") +
-  geom_text(aes(label = round(Avg_Dis_Rate, 0)), 
-            vjust = -0.5, 
-            size = 2.8) + 
-  facet_wrap(~Year, ncol = 4) + 
-  expand_limits(y = max(plot_data_100k$Avg_Dis_Rate) * 1.2) +
+ggplot(dis_crude_rate, aes(x = Year, y = Avg_Dis_Death_Rate, color = Continent)) +
+  geom_line(linewidth = 2.5) +
+  geom_point(size = 4) +
+  # Highlighting Europe with a specific color if desired
+  scale_color_brewer(palette = "RdYlBu") +
   theme_minimal() +
-  labs(title = "Average Disease-Specific Death Rate per 100,000 People",
-    x = "Continent",
-    y = "Deaths per 100k Population") +
+  labs(title = "The Mortality Trajectory",
+       subtitle = "Disease-driven death rates per 100k (1990 - 2015)",
+       x = "Year",
+       y = "Deaths per 100,000") +
   theme(
-    axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
-    strip.background = element_rect(fill = "steelblue"),
-    strip.text = element_text(color = "white", face = "bold"),
-    panel.spacing = unit(1.2, "lines")
+    plot.title = element_text(face = "bold", color = "#191970", size = 20),
+    legend.position = "bottom",
+    # MAKE AXIS WORDING BIGGER
+    # Axis Titles ("Year" and "Deaths per 100,000")
+    axis.title = element_text(size = 16, face = "bold"), 
+    
+    # 2. Axis Text (The actual numbers/years on the scales)
+    axis.text = element_text(size = 14, color = "black"),
+    
+    # 3. Legend Text (The continent names)
+    legend.text = element_text(size = 12)
   )
 ```
 :::
@@ -329,30 +334,23 @@ ggplot(plot_data_100k, aes(x = reorder(Continent, -Avg_Dis_Rate), y = Avg_Dis_Ra
 </style>
 ```{r, echo=FALSE}
 # --- STEP 3: TABLE RENDER ---
-dis_pop_ds %>%
-  group_by(Continent) %>%
+ntrl_deaths %>%
+  filter(Year %in% c(1990, 2015)) %>%
+  group_by(Continent, Year) %>%
   summarize(
-    Avg_Rate = mean((Total.Disease.Deaths / Population) * 100000, na.rm = TRUE)
+    Avg_Rate = (sum(Total.Deaths, na.rm = TRUE) / sum(Population, na.rm = TRUE)) * 100000,
+    .groups = "drop"
   ) %>%
-  arrange(desc(Avg_Rate)) %>%
-  kable(col.names = c("Continent", "Avg. Rate"), 
-        digits = 2) %>%
-  kable_styling(
-    bootstrap_options = c("striped", "hover", "condensed"), 
-    full_width = FALSE,       # This shortens the width
-    position = "left",        # Aligns it to the left to leave room for text
-    font_size = 18            # Increasing font size makes the table "taller"
-  ) %>%
-  row_spec(0, bold = TRUE, color = "white", background = "steelblue") %>%
-  row_spec(1, bold = TRUE, background = "#F0F8FF")%>%
-  # CUSTOMIZE WIDTH HERE:
-  # Adjust 'width' (e.g., "150px" or "3in") to find your "Goldilocks" size
-  column_spec(1, width = "180px") %>% 
-  column_spec(2, width = "180px") %>% 
-  row_spec(0, bold = TRUE, color = "white", background = "steelblue") %>%
-  row_spec(1, bold = TRUE, background = "#F0F8FF") %>%
-  # Optional: Adds vertical spacing to rows to make it even taller
-  row_spec(1:6, extra_css = "padding-top: 10px; padding-bottom: 10px;")
+  # This "spreads" the years into their own columns
+  pivot_wider(names_from = Year, values_from = Avg_Rate) %>%
+  mutate(Growth = `2015` - `1990`) %>% # Optional: Shows the change
+  arrange(desc(`2015`)) %>%
+  kable(digits = 1, col.names = c("Continent", "1990 Rate", "2015 Rate", "Absolute Change")) %>%
+  kable_styling(bootstrap_options = c("striped", "condensed"), full_width = FALSE, font_size = 18) %>%
+  # Highlight the 2015 column to show it's the "Current" status
+  column_spec(3, bold = TRUE, background = "#F0F8FF") %>%
+  row_spec(0, background = "steelblue", color = "white")
+
 ```
 <div style="background-color: #ffffff; padding: 15px; border-left: 5px solid #191970;color: #191970; font-size: 0.9em; margin-top: 15px; box-shadow: 2px 2px 5px rgba(0,0,0,0.1);">
 We show deaths per 100,000 people so that large countries don't overshadow smaller ones. This reveals when major outbreaks or successful medical breakthroughs shifted the numbers.
@@ -455,8 +453,6 @@ disease_totals %>% arrange(Total.Deaths) %>% slice(1)
 ```
 ---
 
-<<<<<<< HEAD
-
 =======
 ## Trends Over Time
 
@@ -473,7 +469,7 @@ disease_totals %>% arrange(Total.Deaths) %>% slice(1)
 global_reach <- dth_pplt_ds %>%
   # We sum all deaths for a disease globally, then divide by total global population
   summarize(across(all_of(disease_cols), 
-                   ~ (sum(. , na.rm = TRUE) / sum(Population, na.rm = TRUE)) * 100000)) %>%
+                   ~ (sum(. , na.rm = TRUE) / sum(Population, na.rm = TRUE)) * 10000)) %>%
   pivot_longer(cols = everything(), 
                names_to = "Disease", 
                values_to = "Global_Avg_Rate") %>%
@@ -488,7 +484,7 @@ dot_plot_data <- dth_pplt_ds %>%
   pivot_longer(cols = all_of(top_diseases), names_to = "Disease", values_to = "Deaths") %>%
   group_by(Continent, Disease) %>%
   # Weighted calculation: Total deaths in continent / Total population in continent
-  summarize(Avg_Rate = (sum(Deaths, na.rm = TRUE) / sum(Population, na.rm = TRUE)) * 100000, 
+  summarize(Avg_Rate = (sum(Deaths, na.rm = TRUE) / sum(Population, na.rm = TRUE)) * 10000, 
             .groups = "drop") %>%
   mutate(Disease = gsub("\\.", " ", Disease))
 ```
@@ -533,10 +529,9 @@ ggplot(dot_plot_data, aes(x = Avg_Rate, y = reorder(Disease, Avg_Rate), color = 
 :::
 
 ---
->>>>>>> 6865639d06f13a5dbecd4ca50347566a7238a862
 
 ```{r, echo=FALSE, warning=FALSE, message=FALSE}
-regional_summary <- dis_pop_ds %>%
+regional_summary <- ntrl_deaths %>%
   filter(Year %in% c(1990, 2000, 2010, 2015)) %>%
   pivot_longer(
     cols = all_of(disease_cols),
@@ -568,7 +563,7 @@ regional_summary %>%
 ```
 
 ```{r}
-dis_pop_ds %>%
+ntrl_deaths %>%
   filter(Year %in% c(1990, 2000, 2010, 2015)) %>%
   pivot_longer(
     cols = all_of(disease_cols),
