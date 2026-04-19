@@ -397,67 +397,6 @@ We show deaths per 100,000 people so that large countries don't overshadow small
 :::
 
 :::
----
-
-## Diseases Affecting Different Countries
-
-```{r, echo = FALSE, message = FALSE, warning = FALSE}
-disease_country_count <- death_ds %>%
-  pivot_longer(
-    cols = -c(Country.Territory, Code, Year, Total.Death),
-    names_to = "Disease",
-    values_to = "Deaths"
-  ) %>%
-  filter(Deaths > 0) %>%
-  group_by(Disease) %>%
-  summarize(
-    Countries.Affected = n_distinct(Country.Territory),
-    .groups = "drop"
-  ) %>%
-  arrange(desc(Countries.Affected))
-
-disease_country_count
-```
-
-The above information shows which diseases effected the most countries. Below I found which diease effected the most countries and which effected the least.This could help by putting this into anotther study to find which disease should possoibly be researched more to find a possible cure.
-
-```{r, echo = FALSE, message = FALSE, warning = FALSE}
-most_affected <- disease_country_count %>%
-  slice_max(Countries.Affected, n = 1)
-
-least_affected <- disease_country_count %>%
-  slice_min(Countries.Affected, n = 1)
-
-most_affected
-least_affected
-```
-
-```{r, echo = FALSE, message = FALSE, warning = FALSE}
-disease_totals <- death_ds %>%
-  pivot_longer(
-    cols = -c(Country.Territory, Code, Year, Total.Death),
-    names_to = "Disease",
-    values_to = "Deaths"
-  ) %>%
-  group_by(Disease) %>%
-  summarize(
-    Total.Deaths = sum(Deaths, na.rm = TRUE),
-    .groups = "drop"
-  ) %>%
-  filter(Total.Deaths > 0) %>%
-  arrange(desc(Total.Deaths))
-```
-
-```{r, echo = FALSE, message = FALSE, warning = FALSE}
-disease_totals %>% arrange(desc(Total.Deaths)) %>% slice(1)
-disease_totals %>% arrange(Total.Deaths) %>% slice(1)
-```
----
-
-=======
-## Trends Over Time
-
-### How has the relationship between population and mortality evolved?
 
 ---
 
@@ -528,6 +467,73 @@ ggplot(dot_plot_data, aes(x = Avg_Rate, y = reorder(Disease, Avg_Rate), color = 
 :::
 
 :::
+
+---
+
+## Lets Focus in on Europe
+
+```{r, echo = FALSE}
+
+europe_ntrl_dths <- ntrl_deaths %>%
+  filter(Continent == "Europe") %>%
+  pivot_longer(
+    cols = -c(Country.Territory, Continent, Year, Total.Deaths, Population),
+    names_to = "Disease",
+    values_to = "Deaths"
+  ) %>%
+  filter(Deaths > 0) %>%
+  group_by(Disease) %>%
+  summarize(
+    Countries.Affected = n_distinct(Country.Territory),
+    .groups = "drop"
+  ) %>%
+  arrange(desc(Countries.Affected))
+
+europe_ntrl_dths %>% 
+  kable(col.names = c("Causes of Deaths", "Countries Affected by Deaths"), digits = 1) %>% 
+  kable_styling(bootstrap_options = c("striped", "condensed"), font_size = 16) %>%
+  row_spec(0, bold = TRUE, color = "white", background = "#4682B4")
+
+```
+
+The above information shows which diseases effected the most countries in Europe. We should further investigate to see the trends of these diseases.
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+
+europe_ntrl_dths %>% filter(Countries.Affected > 40) -> max_europe_ntrl_dths
+
+max_europe_ntrl_dths[[1]] -> disease_names
+
+ntrl_deaths %>% select(all_of(disease_names), Year, Continent) %>% filter(Continent == "Europe") -> for_graph
+
+```
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+disease_totals <- death_ds %>%
+  pivot_longer(
+    cols = -c(Country.Territory, Code, Year, Total.Death),
+    names_to = "Disease",
+    values_to = "Deaths"
+  ) %>%
+  group_by(Disease) %>%
+  summarize(
+    Total.Deaths = sum(Deaths, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  filter(Total.Deaths > 0) %>%
+  arrange(desc(Total.Deaths))
+```
+
+```{r, echo = FALSE, message = FALSE, warning = FALSE}
+disease_totals %>% arrange(desc(Total.Deaths)) %>% slice(1)
+disease_totals %>% arrange(Total.Deaths) %>% slice(1)
+```
+---
+
+=======
+## Trends Over Time
+
+### How has the relationship between population and mortality evolved?
 
 ---
 
