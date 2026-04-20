@@ -91,7 +91,7 @@ dth_pplt_ds %>%
 Our dataset show various different death causes, both natural and unnatural.
 
 ```{r, echo = FALSE, warning = FALSE, fig.width=8, fig.height=13 }
-all_cause_cols <- colnames(dth_pplt_ds)[5:34]
+all_cause_cols <- colnames(dth_pplt_ds)[4:34]
 
 non_diseases <- c("Drowning", "Interpersonal.Violence", "Drug.Use.Disorders", "Alcohol.Use.Disorders", "Self.harm", "Exposure.to.Forces.of.Nature", "Environmental.Heat.and.Cold.Exposure", "Conflict.and.Terrorism", "Road.Injuries", "Poisonings", "Fire..Heat..and.Hot.Substances", "Maternal.Disorders")
 
@@ -363,29 +363,43 @@ europe_summary_table %>%
 ::: {.column width="65%"}
 
 ```{r, echo=FALSE, fig.width=9, fig.height=6, message=FALSE, warning=FALSE}
+# We find the top 11 diseases based on the most recent year's totals
+top_11_diseases <- graph_data %>%
+  filter(Year == max(Year)) %>%
+  arrange(desc(Total_Deaths)) %>%
+  slice_head(n = 11) %>%
+  pull(Disease)
+
+# Filter the main dataset to only include these 11
+graph_data_top11 <- graph_data %>%
+  filter(Disease %in% top_11_diseases)
+
 # GRAPH RENDER 
-ggplot(graph_data, aes(x = Year, y = Total_Deaths, color = Disease)) +
+ggplot(graph_data_top11, aes(x = Year, y = Total_Deaths, color = Disease)) +
   geom_line(linewidth = 1.2, alpha = 0.8) +
   geom_point(size = 2) + 
-  scale_y_log10() + 
+  scale_y_log10() + # Added comma labels for readability
+  
+  # The RdYlBu palette has exactly 11 colors
   scale_color_brewer(palette = "RdYlBu") + 
+  
   theme_minimal() +
   labs(title = "Mortality Trends in Europe",
-       subtitle = "Total deaths per disease (Logarithmic Scale)",
+       subtitle = "Top 11 Causes of Death (Logarithmic Scale)",
        x = "Year",
        y = "Total Deaths",
        color = "Cause of Death") +
   theme(
-    plot.margin = margin(t = 10, r = 0, b = 10, l = 20),
+    plot.margin = margin(t = 10, r = 20, b = 10, l = 20), # Increased right margin
     plot.title = element_text(face = "bold", color = "#191970", size = 20),
     legend.position = "bottom",
-    legend.margin = margin(t = 10),
-    legend.text = element_text(size = 10),
-    legend.title = element_text(size = 14, face = "bold"),
+    legend.text = element_text(size = 9),
+    legend.title = element_text(size = 12, face = "bold"),
     axis.title = element_text(size = 14, face = "bold"),
     axis.text = element_text(size = 12, color = "black")
   ) + 
-  guides(color = guide_legend(ncol = 2, nrow = 6, byrow = TRUE)) 
+  # Adjusted to fit 11 items neatly (2 columns)
+  guides(color = guide_legend(ncol = 2, byrow = TRUE))
 ```
 
 :::
