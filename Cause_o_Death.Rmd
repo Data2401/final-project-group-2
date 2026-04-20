@@ -1,18 +1,26 @@
 ---
-title: "Cause_o_Death"
+title: "Cause_of_Death"
+author: "Jorge Alejandro, Mia Alanis, Bryce Borak"
 output: slidy_presentation
-author: Jorge Alejandro, Mia Alanis, Bryce Borak
 ---
 
-```{r, echo = FALSE, warning = FALSE, message = FALSE}
+```{r, echo=FALSE, message=FALSE, warning=FALSE, include=FALSE}
 library(tidyverse)
 library(shiny)
+library(knitr)
+library(ggplot2)
+library(kableExtra)
+library(stringr)
+library(sf) # For map handling
+library(rnaturalearth) # For getting the Europe map outlines
+install.packages("viridis", repos = "https://cran.rstudio.com/")
+library(viridis) # For the color palette
+install.packages("ggrepel", repos = "https://cran.rstudio.com/")
+library(ggrepel) #best for labels
 
 #setting up the datasets we will be using for our projects
   death_ds <- read.csv("cause_of_deaths.csv")
   popu_ds <- read.csv("world_population.csv")
-  
-  #The issue im having now is that ive realized that the years in the population data set are columns and the year in the deaths data set are rows. Im trying to figure out a way where we can have the population info combine with the death data set if the years match up, might have to be a question for the professor)
 
 #Im going to add other columns that include things such as "Total recorded deaths" and a calculation for the crude death rate.
   death_ds %>% mutate(Total.Death = rowSums(death_ds[, -c(1:3)], na.rm = TRUE)) -> death_ds
@@ -34,57 +42,463 @@ library(shiny)
   
 #We might also want to use the numbers of the death rate of a population so im going to mutate the dataset to have that in the final column
   
-  dth_pplt_ds %>% mutate(Crude.Death.Rate = (Total.Death / Population) * 1000, .after = "Total.Death") -> dth_pplt_ds
-```
-## Our Data
-Our data come from Kaggle. "Cause of Deaths" and "World Population", both CSV data sets.
+  dth_pplt_ds %>% mutate(Crude.Death.Rate = (Total.Death / Population) * 100, .after = "Total.Death") -> dth_pplt_ds
 
-Whyd we choose this data and what are we hoping to learn from it?
+```
+
+## Our Data
+
+::: {style="float: left; width: 45%; border-right: 2px solid steelblue; padding-right: 20%;"}
+### **Raw Input**
+
+**World Population** \* 234 Rows \| 17 Columns \* [Source Link](https://www.kaggle.com/datasets/iamsouravbanerjee/world-population-dataset)
+
+**Causes of Death** \* 6,120 Rows \| 34 Columns \* [Source Link](https://www.kaggle.com/datasets/iamsouravbanerjee/cause-of-deaths-around-the-world)
+:::
+
+::: {style="float: right; width: 45%; color: midnightblue;"}
+### **Final Data Set**
+
+-   **796** Rows
+-   **45** Columns
+
+**Key Operations:** 1. **Filter:** Decadal years (1970-2022) 2. **Pivot:** Population into long format 3. **Join:** Inner join by Country/Year 4. **Mutate:** Added Crude Death Rate
+:::
+
+```{r, echo=FALSE, fig.width=8, fig.height=15}
+dth_pplt_ds %>%
+  head(100) %>%
+  # Remove the comma from Year and format numbers
+  mutate(Year = as.character(Year),
+         across(where(is.numeric), ~scales::comma(.))) %>% 
+  kbl() %>%
+  kable_styling(
+    bootstrap_options = c("bordered", "condensed", "hover"), 
+    full_width = FALSE,  # This keeps the table from stretching
+    position = "center",  # Centers the smaller table on the page
+    font_size = 18    # Manually shrink the text size (default is usually 16)
+  ) %>%
+  row_spec(0, background = "steelblue", color = "white") %>%
+  # Explicitly set column widths to keep it "thin"
+  column_spec(1:ncol(dth_pplt_ds), border_left = TRUE, border_right = TRUE) %>% 
+  scroll_box(width = "1400px", height = "350px") # Set a fixed pixel width instead of 100%
+```
 
 ## What is Shown in our Data Set
-```{r}
-tibble(dth_pplt_ds)
+
+### What Makes up the Majority of Our Columns?
+
+Our dataset show various different death causes, both natural and unnatural.
+
+```{r, echo = FALSE, warning = FALSE, fig.width=8, fig.height=13 }
+all_cause_cols <- colnames(dth_pplt_ds)[5:34]
+
+non_diseases <- c("Drowning", "Interpersonal.Violence", "Drug.Use.Disorders", "Alcohol.Use.Disorders", "Self.harm", "Exposure.to.Forces.of.Nature", "Environmental.Heat.and.Cold.Exposure", "Conflict.and.Terrorism", "Road.Injuries", "Poisonings", "Fire..Heat..and.Hot.Substances", "Maternal.Disorders")
+
+clean_non_diseases <- str_replace_all(non_diseases, "\\.", " ")
+
+disease_cols <- setdiff(all_cause_cols, non_diseases)
+
+clean_diseases_cols <- str_replace_all(disease_cols, "\\.", " ")
+
+#this is just separating the columns with out the death types
+other_columns <- setdiff(colnames(dth_pplt_ds), all_cause_cols)
+
+clean_other_cols <- str_replace_all(other_columns, "\\.", " ")
+
+other_cols_table <- data.frame(
+  Other_Columns = clean_other_cols
+)
+
+max_ln_all <- max(length(clean_other_cols), 
+                  length(clean_diseases_cols), 
+                  length(clean_non_diseases))
+
+#this is creating the combined data frame
+combined_dictionary <- data.frame(
+  Other_Columns = c(clean_other_cols, rep("", max_ln_all - length(clean_other_cols))),
+  Disease_Causes = c(clean_diseases_cols, rep("", max_ln_all - length(clean_diseases_cols))),
+  Non_Disease_Causes = c(clean_non_diseases, rep("", max_ln_all - length(clean_non_diseases)))
+)
+
+#this is to create a table to show both diseases and non-diseases but also the other columns
+max_ln <- max(length(clean_diseases_cols) , length(clean_non_diseases))
+
+comparison_table <- data.frame(
+  Disease_Causes = c(clean_diseases_cols, rep(NA, max_ln - length(clean_diseases_cols))),
+  Non_Disease_Causes = c(clean_non_diseases, rep(NA, max_ln - length(clean_non_diseases)))
+)
+
+comparison_table[is.na(comparison_table)] <- ""
+
+#this create a better looking Table
+combined_dictionary %>%
+  kbl(col.names = c("Data Columns", "Diseases Columns", "Non-Disease Columns"),
+      caption = "Dataset Column Classification",
+      align = "lll") %>%
+  kable_styling(bootstrap_options = c("bordered", "condensed"), 
+                full_width = FALSE, 
+                position = "center",
+                font_size = 26) %>%
+  # Header Styling
+  row_spec(0, background = "steelblue", color = "white", bold = TRUE) %>%
+  # Column Boxing and Widths
+  column_spec(1, border_left = TRUE, border_right = TRUE, width = "15em", bold = TRUE) %>%
+  column_spec(2, border_right = TRUE, width = "18em") %>%
+  column_spec(3, border_right = TRUE, width = "18em") %>% 
+  scroll_box(width = "1400px", height = "550px")
 ```
 
-## What Makes up the Majority of Our Columns?
-### Our dataset show various different death causes, both natural and unnatural.
-```{r, echo = FALSE, warning = FALSE}
-print(colnames(dth_pplt_ds)[5:34])
+------------------------------------------------------------------------
+
+::: {style="float: left; width: 48%; padding-top: 10px;"}
+### **The Data Collaboration**
+
+The **"Cause of Deaths"** dataset provides the *counts*, but the **"World Population"** dataset provides the *context*.
+
+By merging them, we move from raw totals to meaningful **rates**. This allows us to answer not just *"how many died?"*, but **"how heavily was the population actually impacted?"**
+
+<br>
+
+### **The Investment Perspective**
+
+**Imagine we are a global healthcare fund.** How do we choose where to invest? 
+
+We don't just look at who has the most deaths; we analyze:
+- **The Crude Death Rate:** The true burden on the people.
+- **The Trend:** Is the crisis improving or worsening?
+:::
+
+::: {style="float: right; width: 45%; background-color: #F0F8FF; padding: 10px; border-radius: 12px; border: 2px solid #4682B4; color: #191970;"}
+### **Our Core Questions**
+
+- **Regional Burden:** Which continents face the heaviest impact from biological diseases?
+
+
+- **Distribution & Trends:**
+How do specific diseases distribute across the continent?
+
+
+- **The Cardiovascular Divide:**
+Which nations face the highest mortality burden from heart disease?
+
+:::
+
+
+```{r echo=FALSE, warning = FALSE}
+## Continents with the Most Deaths
+
+ntrl_deaths <- dth_pplt_ds %>% 
+  select(-c(all_of(non_diseases), Total.Death, Crude.Death.Rate))
+
+ntrl_deaths <- ntrl_deaths %>% 
+  mutate(
+    Total.Deaths = rowSums(across(all_of(disease_cols)), na.rm = TRUE), 
+    # Standard crude rate is usually per 1,000 or 100,000
+    # Your current (Total/Pop)/100 is essentially a percentage.
+    Crude.Death.Rate = (Total.Deaths / Population) * 100000
+  )
 ```
-## What Can we Learn with Our Data
-Our main focus is the "Cause of Deaths Data set", So where does the "World Population" data set come into play?
 
-How are we using both these data set and what can we learn?
+---
 
-- Continents and countries
-- Population and how we calculate "Death rate"
-- As the years go by, population increases. DOes this affect the death rate significantly?
+## Regional Burden
 
-## 
-```{r}
-#
+### Which continents face the heaviest impact from biological diseases?
+
+```{r, echo=FALSE}
+ntrl_deaths <- ntrl_deaths %>% 
+  select(-c(Code, Rank, CCA3, Capital, Density..per.km.., Growth.Rate, World.Population.Percentage, Area..km..))  %>% 
+  relocate(Continent, .after = Country.Territory) %>% 
+  relocate(Total.Deaths, .after = Acute.Hepatitis)
+
+#Summarize with the Weighted Rate
+# We save this to a new object for your plot/table
+dis_crude_rate <- ntrl_deaths %>% 
+  group_by(Continent, Year) %>%
+  summarize(
+    # We must SUM the deaths and population for the continent
+    Total_Deaths_Continent = sum(Total.Deaths, na.rm = TRUE),
+    # Calculate the rate here so the next line can 'arrange' by it
+    Crude.Death.Rate = (Total_Deaths_Continent / sum(Population, na.rm = TRUE)) * 100000,
+    .groups = "drop"
+  ) %>%
+  # Now arrange works because Crude.Death.Rate exists in this table
+  arrange(Year, desc(Crude.Death.Rate))
+
+#disease crude death rate
+dis_crude_rate <- ntrl_deaths %>%
+  group_by(Continent, Year) %>%
+  summarize(
+    # name it clearly to distinguish it from the overall Crude Death Rate
+    Avg_Dis_Death_Rate = mean((Total.Deaths / Population) * 100000, na.rm = TRUE)
+  , .groups = "drop" ) %>%
+  arrange(desc(Avg_Dis_Death_Rate))
+
 ```
 
+::: {.columns}
 
+::: {.column width="65%"}
+```{r, echo=FALSE}
+# --- STEP 2: GRAPH RENDER ---
+ggplot(dis_crude_rate, aes(x = Year, y = Avg_Dis_Death_Rate, color = Continent)) +
+  geom_line(linewidth = 2.5) +
+  geom_point(size = 4) +
+  # Highlighting Europe with a specific color if desired
+  scale_color_brewer(palette = "RdYlBu") +
+  theme_minimal() +
+  labs(title = "The Mortality Trajectory",
+       subtitle = "Disease-driven death rates per 100k (1990 - 2015)",
+       x = "Year",
+       y = "Deaths per 100,000") +
+  theme(
+    plot.title = element_text(face = "bold", color = "#191970", size = 20),
+    legend.position = "bottom",
+    # MAKE AXIS WORDING BIGGER
+    # Axis Titles ("Year" and "Deaths per 100,000")
+    axis.title = element_text(size = 16, face = "bold"), 
+    
+    # 2. Axis Text (The actual numbers/years on the scales)
+    axis.text = element_text(size = 14, color = "black"),
+    
+    # 3. Legend Text (The continent names)
+    legend.text = element_text(size = 12)
+  )
+```
+:::
 
+::: {.column width="35%"}
+<style>
+.table {
+    margin-top: 30px; /* Moves table down from the header */
+    border: 2px solid #4682B4; /* Adds a Steelblue border around the whole table */
+}
+</style>
+```{r, echo=FALSE}
+# --- STEP 3: TABLE RENDER ---
+ntrl_deaths %>%
+  filter(Year %in% c(1990, 2015)) %>%
+  group_by(Continent, Year) %>%
+  summarize(
+    Avg_Rate = (sum(Total.Deaths, na.rm = TRUE) / sum(Population, na.rm = TRUE)) * 100000,
+    .groups = "drop"
+  ) %>%
+  # This "spreads" the years into their own columns
+  pivot_wider(names_from = Year, values_from = Avg_Rate) %>%
+  mutate(Growth = `2015` - `1990`) %>% # Optional: Shows the change
+  arrange(desc(`2015`)) %>%
+  kable(digits = 1, col.names = c("Continent", "1990 Rate", "2015 Rate", "Absolute Change")) %>%
+  kable_styling(bootstrap_options = c("striped", "condensed"), full_width = FALSE, font_size = 18) %>%
+  # Highlight the 2015 column to show it's the "Current" status
+  column_spec(3, bold = TRUE, background = "#F0F8FF") %>%
+  row_spec(0, background = "steelblue", color = "white")
 
+```
+<div style="background-color: #ffffff; padding: 15px; border-left: 5px solid #191970;color: #191970; font-size: 0.9em; margin-top: 15px; box-shadow: 2px 2px 5px rgba(0,0,0,0.1);">
+We show deaths per 100,000 people so that large countries don't overshadow smaller ones. This reveals when major outbreaks or successful medical breakthroughs shifted the numbers.
+</div>
+:::
 
+:::
 
+---
 
+## Distribution & Trends: Europe Deep-Dive
 
-```{r, echo = FALSE}
-death_ds %>% ggplot(aes(x = Year, y = Total.Death, )) + geom_point()
-  #For this graph to be a little bit more legible, we either have to change what kind of graph we use, or we solve the first issue of trying to combine population with year and use the color of continent.
+### How do specific diseases distribute across the continent?
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+# DATA PREPARATION
+# Clean names and filter for Europe once
+europe_base <- ntrl_deaths %>%
+  filter(Continent == "Europe") %>%
+  select(all_of(disease_cols), Country.Territory, Year, Population) %>%
+  pivot_longer(cols = all_of(disease_cols), names_to = "Disease", values_to = "Deaths") %>%
+  mutate(Disease = str_replace_all(Disease, "\\.", " "))
+
+# Prepare Table Data (Count countries)
+europe_summary_table <- europe_base %>%
+  filter(Deaths > 0) %>%
+  group_by(Disease) %>%
+  summarize(Countries = n_distinct(Country.Territory), .groups = "drop") %>%
+  arrange(desc(Countries))
+
+# Prepare Graph Data (Top diseases > 40 countries)
+top_diseases <- europe_summary_table$Disease[europe_summary_table$Countries > 40]
+
+graph_data <- europe_base %>%
+  filter(Disease %in% top_diseases) %>%
+  group_by(Year, Disease) %>%
+  summarise(Total_Deaths = sum(Deaths, na.rm = TRUE), .groups = "drop")
+```
+
+::: {.columns}
+
+::: {.column width="35%"}
+
+<style>
+/* This fixes the table border you wanted */
+.scrollbox-area {
+border: 2px solid #4682B4;
+margin-top: 10px;
+}
+</style>
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+#TABLE RENDER
+europe_summary_table %>%
+  kable(format = "html", col.names = c("Cause of Death", "Countries Affected")) %>%
+  kable_styling(bootstrap_options = c("striped", "condensed"), font_size = 16) %>%
+  row_spec(0, background = "steelblue", color = "white") %>%
+  scroll_box(height = "400px", width = "100%")
+```
+
+<div style="background-color: #ffffff; padding: 12px; border-left: 5px solid #191970; color: #191970; font-size: 0.8em; margin-top: 10px; box-shadow: 2px 2px 5px rgba(0,0,0,0.1); line-height: 1.4;">
+  <strong>Key Insight:</strong> This view highlights the "Widespread" paradox. While many diseases affect every European nation, the logarithmic trends show a steady decline in communicable deaths while chronic conditions remain stable.
+</div>
+
+:::
+
+::: {.column width="65%"}
+
+```{r, echo=FALSE, fig.width=9, fig.height=6, message=FALSE, warning=FALSE}
+# GRAPH RENDER 
+ggplot(graph_data, aes(x = Year, y = Total_Deaths, color = Disease)) +
+  geom_line(linewidth = 1.2, alpha = 0.8) +
+  geom_point(size = 2) + 
+  scale_y_log10() + 
+  scale_color_brewer(palette = "RdYlBu") + 
+  theme_minimal() +
+  labs(title = "Mortality Trends in Europe",
+       subtitle = "Total deaths per disease (Logarithmic Scale)",
+       x = "Year",
+       y = "Total Deaths",
+       color = "Cause of Death") +
+  theme(
+    plot.margin = margin(t = 10, r = 0, b = 10, l = 20),
+    plot.title = element_text(face = "bold", color = "#191970", size = 20),
+    legend.position = "bottom",
+    legend.margin = margin(t = 10),
+    legend.text = element_text(size = 10),
+    legend.title = element_text(size = 14, face = "bold"),
+    axis.title = element_text(size = 14, face = "bold"),
+    axis.text = element_text(size = 12, color = "black")
+  ) + 
+  guides(color = guide_legend(ncol = 2, nrow = 6, byrow = TRUE)) 
+```
+
+:::
+
+:::
+---
+
+## The Cardiovascular Divide: The Cardiovascular Landscape of Europe (2015)
+
+### Which nations face the highest mortality burden from heart disease?
+
+```{r, echo=FALSE, message=FALSE, warning=FALSE}
+
+# map data for Europe
+europe_map <- ne_countries(scale = "medium", continent = "Europe", returnclass = "sf")
+
+#Filter your data for Cardio Deaths in the most recent year (2015)
+cardio_2015 <- ntrl_deaths %>%
+  filter(Continent == "Europe", Year == 2015) %>%
+  mutate(Country.Territory = case_when(
+    Country.Territory == "Russian Federation" ~ "Russia",
+    Country.Territory == "United Kingdom" ~ "United Kingdom",
+    Country.Territory == "Czech Republic" ~ "Czechia",
+    TRUE ~ Country.Territory  # This keeps all other names the same
+  )) %>%
+  # We use Country.Territory since Code is missing
+  select(Country.Territory, Population, any_of("Cardiovascular.Diseases")) %>%
+  mutate(Cardio_Rate_100k = (Cardiovascular.Diseases / Population) * 100000)
+
+#join your data to the map data using the ISO Code (e.g., "GBR", "FRA")
+europe_map_data <- europe_map %>%
+  left_join(cardio_2015, by = c("name" = "Country.Territory")) %>%
+  filter(continent == "Europe")  # Keeps the map focused
 
 ```
 
-## What countries would require the most medical funding and research?
+::: {.columns style="display: flex; align-items: flex-start;"}
 
-```{r}
-#Top 10 highest death rate percentage (not filtered to just diseases)
-dth_pplt_ds %>% 
-  filter(Year == 2015) %>% 
-  slice_max(Crude.Death.Rate, n = 10)
+::: {.column width="75%"}
+
+```{r, echo=FALSE,fig.width=7, fig.height=5.5, out.width="100%", message=FALSE, warning=FALSE}
+
+top_5_labels <- europe_map_data %>%
+  filter(!is.na(Cardio_Rate_100k)) %>%
+  arrange(desc(Cardio_Rate_100k)) %>%
+  slice_head(n = 5)
+
+# MAP RENDER (The "Big Visual")
+ggplot(data = europe_map_data) +
+  # Draw the country polygons and fill by the Cardio Rate
+  geom_sf(aes(fill = Cardio_Rate_100k), color = "white", linewidth = 0.3) +
+  geom_label_repel(
+    data = top_5_labels, 
+    aes(label = name, geometry = geometry),
+    stat = "sf_coordinates",
+    size = 3.5,
+    fontface = "bold",
+    color = "#191970",           # Dark blue text
+    fill = alpha("white", 0.7),  # Semi-transparent white box for readability
+    box.padding = 0.5,           # Keeps labels away from each other
+    segment.color = 'black'     # Adds a small line pointing to the country
+  ) +
+  # Set the coordinate limits to zoom in on Europe (excluding most of Russia)
+  coord_sf(xlim = c(-25, 70), ylim = c(34, 72), expand = FALSE) +
+  
+  # Define the Steel Blue color scale (from light to dark)
+  scale_fill_distiller(palette = "Blues", direction = 1, na.value = "#F0F0F0",
+                       name = "Deaths per 100k", labels = scales::comma) +
+  
+  theme_minimal() +
+  labs(title = "Cardiovascular Mortality Rates",
+       subtitle = "Deaths per 100,000 population",
+       caption = "Note: 2015 Data. Russia included up to the Ural Mountains.") +
+  
+  theme(
+    plot.title = element_text(face = "bold", color = "#191970", size = 22),
+    plot.subtitle = element_text(size = 14, color = "black"),
+    legend.position = "right", # Puts the key on the side
+    legend.title = element_text(size = 11, face = "bold"),
+    legend.text = element_text(size = 10),
+    # Hide the background grid lines for a cleaner look
+    panel.grid = element_blank(),
+    axis.text = element_blank(), # Hide lat/long labels
+    axis.ticks = element_blank(),
+    axis.title = element_blank()
+  )
+```
+:::
+
+::: {.column width="25%" style="margin-left: -2%;"}
+
+<div style="margin-top: 40px;">
+
+```{r, echo=FALSE,}
+#  TOP 5 TABLE RENDER 
+cardio_2015 %>%
+  select(Country.Territory, Cardio_Rate_100k) %>%
+  arrange(desc(Cardio_Rate_100k)) %>%
+  kable(format = "html", digits = 1, col.names = c("Country", "Rate")) %>%
+  kable_styling(bootstrap_options = c("striped", "condensed"), 
+                font_size = 13, 
+                full_width = TRUE) %>% 
+  row_spec(0, background = "#4682B4", color = "white", extra_css = "position: sticky; top: 0;") %>%
+  # Reset width to 100% so it stays inside its column
+  scroll_box(height = "280px", width = "100%")
 
 ```
 
+</div>
+
+<div style="background-color: #ffffff; padding: 10px; border-left: 4px solid #191970; color: #191970; font-size: 0.75em; margin-top: 10px; line-height: 1.3;">
+<strong>Key Insight:</strong> The data highlights a stark East-West divide. High mortality rates cluster in Eastern Europe, while Western and Northern nations show a significantly lower burden.
+</div>
+:::
+
+:::
