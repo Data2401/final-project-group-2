@@ -4,7 +4,7 @@ author: "Jorge Alejandro, Mia Alanis, Bryce Borak"
 output: 
   html_document:
     toc: true
-    code_folding: show
+    code_folding: hide
   
 ---
 
@@ -98,6 +98,12 @@ dth_pplt_ds %>%
 ```
 
 ## What is Shown in our Data Set
+
+  We cleaned our data in a way where we were able to join both data sets. We first used the function "pivot_longer" on the "World Population Data Set." The reason we did this was because the way the data set was originally formatted, the years were in the columns unlike the "Causes of Death Data set" where the years were separated by rows. This caused issues when trying to join both datasets as we wouldnt be able to join them by the year.
+  
+  After changing the format of the "World Population Data set," we were able to make each row a different year with a correlating country. We then joined the two data set using the year and the country so we could get the country year and continent with the information of the deaths. This makes it possible to be able to see the stats of total deaths in different continents instead of just the countries. 
+  
+  Not only do we focus on the location of the deaths that are taking place, but we also mutated our data set to include a "Total Deaths" column. The way we did this was by taking the putting a fucntion that takes the number of each column that we manually typed, and getting the sum of those numbers and plugging it back into the "Total deaths" collumn. The other mutation that we added was a "Crude Death Rate" where we took the total deaths and divided it byt the total population of the country. This then gets plugged into the "Crude Death Rate" column.
 
 ### What Makes up the Majority of Our Columns?
 
