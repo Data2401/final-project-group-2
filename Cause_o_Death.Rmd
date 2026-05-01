@@ -107,7 +107,9 @@ dth_pplt_ds %>%
 
 ### What Makes up the Majority of Our Columns?
 
-Our dataset show various different death causes, both natural and unnatural.
+  Our data set show various different death causes, both natural and unnatural. When sorting and organizing our code, we manually made a matrix which included all the "natural death" causes. These include diseases such as alzheimers and cardiovascular diseases. Once we made our filter, we were able to go in and do the opposite where we had a "Non-natural disease" matrix. Our main focus in this deep dive is going to do more with the natural deaths. With this, we make a brand new data set that is derived from the joined data set of the World population data set and the Causes of Deaths data set. From here, we filter out any column that is non-natural causes of deaths.
+  
+  Because our dataset get mixed in because of the filter, we also went in to update the total deaths and the crude death rate so this way we get the total deaths and the crude death rates of the natural causes of death. 
 
 ```{r, echo = FALSE, warning = FALSE, fig.width=8, fig.height=13 }
 all_cause_cols <- colnames(dth_pplt_ds)[4:34]
