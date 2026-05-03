@@ -193,6 +193,8 @@ We don't just look at who has the most deaths; we analyze:
 ::: {style="float: right; width: 45%; background-color: #F0F8FF; padding: 10px; border-radius: 12px; border: 2px solid #4682B4; color: #191970;"}
 ### **Our Core Questions**
 
+  To try and narrow down the different ways we could have used our data for, we tried simulating a corporation that is trying to find a refion of the world to invest their money to funding a cure for a certain disease or, if its a disease that can is caused by certain life style choices, putting that funding into education. Of course to start this form of thinking, we would want to try and first find which continent we want to put our investment towards. Thankfully with our data set that we have changed and updated, we can filter our data by continent, and find the total deaths per natural causes per continent. With this, we can find the total crude death rate for each continent.
+  
 - **Regional Burden:** Which continents face the heaviest impact from biological diseases?
 
 
@@ -226,6 +228,12 @@ ntrl_deaths <- ntrl_deaths %>%
 ## Regional Burden
 
 ### Which continents face the heaviest impact from biological diseases?
+
+  Based on the graph below, we see the trends from 4 different years in each continent. The main bar that stands out would be the one representing Africa. This trend shows that while at some point Africa did have one of the highest mortality rates, they were able to change that within the following years. Based on research, one of the biggest reasons for this trend is the use of netting while sleeping and stronger mosquito bug spray. 
+  
+  The biggest cause of deaths in Africa was Malaria, which is transmitted by mosquito. The implementation of using bug netting prevented even further spread of malaria. Mosquito spray also was a big impact to the spread of malaria and was able to reduce the numbers of people infected with malaria. 
+  
+  The other big reason as to why Africa was a dwindling death rate is the amount of money being used to fund medical advancement in Africa. A large portions of corporations will fund medical advancement in Africa because of how much promotion for these donation are widespread.
 
 ```{r, echo=FALSE}
 ntrl_deaths <- ntrl_deaths %>% 
@@ -324,6 +332,10 @@ We show deaths per 100,000 people so that large countries don't overshadow small
 :::
 
 ---
+  
+  Back to the original question we were trying to answer, to be able to figure out which continent we should focus on, lets further study the other trends in this graph. When we first originally made this graph, we made a point graph that was comparing the total deaths in a continent with the total population. The result was a linear graph in which the more population a continent had, the more deaths it had.Asia of course was the continent with the most amount of deaths 
+  
+  That graph was scrapped due to the lack of information we were able to collect with it. With the previous graph, you would believe that Asia would have one of the higher rates of death, but the opposite is true. Asia has one of the lowest death rates compared to the rest of the continents. The second continent with the highest death rates is Europe. The trend for Europe seems to be going upward slightly. While the trend may not be drastic, it would be best to consider Europe for the funding as our ultimate goal would be to lower any high death rates and make any trend go down.
 
 ## Distribution & Trends: Europe Deep-Dive
 
