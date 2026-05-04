@@ -230,11 +230,22 @@ ntrl_deaths <- ntrl_deaths %>%
 
 ### Which continents face the heaviest impact from biological diseases?
 
-  Based on the graph below, we see the trends from 4 different years in each continent. The main bar that stands out would be the one representing Africa. This trend shows that while at some point Africa did have one of the highest mortality rates, they were able to change that within the following years. Based on research, one of the biggest reasons for this trend is the use of netting while sleeping and stronger mosquito bug spray. 
+  Based on the graph below, we see the trends from 4 different years in each continent. The main bar that stands out would be the one representing Africa. This trend shows that while at some point Africa did have one of the highest mortality rates, they were able to change that within the following years. 
+
+<u>Fun Fact</u>
+
+  The tremendous decline in Africa's mortality rates between 2000 and 2015 was largely driven by aggressive interventions against malaria. During this period, malaria deaths in sub-Saharan Africa plummeted. This success was primarily due to the massive upgrade of insecticide-treated bed nets (ITNs), which prevented millions of infections while people slept, alongside the widespread implementation of indoor residual spraying and more effective artemisinin-based combination therapies. 
   
-  The biggest cause of deaths in Africa was Malaria, which is transmitted by mosquito. The implementation of using bug netting prevented even further spread of malaria. Mosquito spray also was a big impact to the spread of malaria and was able to reduce the numbers of people infected with malaria. 
+  The other big major factor in this dwindling death rate was the surge in financial capital directed toward medical advancement and healthcare infrastructure on the continent. A significant portion of this progress was fueled by large corporations and global philanthropic organizations that funded medical research and supply chains, motivated by the widespread promotion and global visibility of these humanitarian efforts. 
   
-  The other big reason as to why Africa was a dwindling death rate is the amount of money being used to fund medical advancement in Africa. A large portions of corporations will fund medical advancement in Africa because of how much promotion for these donation are widespread.
+  These targeted health initiatives, supported by global funding, successfully transformed malaria and other infectious diseases from a dominant, uncontrolled killer into a manageable public health challenge.
+  
+  <u>Further Reading & Sources</u>
+  
+* [World Health Organization (WHO): Malaria's Role in Mortality Decline](https://www.who.int/news-room/fact-sheets/detail/malaria)
+* [African Development Bank: Corporate Funding and Health Progress](https://www.afdb.org/fr/news-and-events/child-mortality-rates-in-sub-saharan-africa-fall-dramatically-13279)
+* [World Bank: Rates of progress in mortality decline, 2000-2019](https://openknowledge.worldbank.org/server/api/core/bitstreams/d5755e12-de39-4874-8f0c-d28d0e2863e7/content)
+
 
 ```{r, echo=FALSE}
 ntrl_deaths <- ntrl_deaths %>% 
