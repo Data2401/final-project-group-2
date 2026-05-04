@@ -440,6 +440,9 @@ ggplot(graph_data_top11, aes(x = Year, y = Total_Deaths, color = Disease)) +
 :::
 
 :::
+
+Based on the data presented in the visual, we are looking at a deep-dive into Mortality Trends in Europe between 1990 and 2015. The table on the left indicates a "Widespread" impact, showing that major causes of death like Cardiovascular Diseases and Alzheimer's affect all 42 countries in the dataset. The line graph utilizes a logarithmic scale to track the top 11 causes of death, revealing that while cardiovascular diseases remain the leading cause of mortality, most chronic conditions are showing a steady or slightly increasing trajectory in total deaths over time. However, it is important to note that these specific numbers and trends are tied directly to the European region; if the underlying code were modified to filter for a different continent or country—such as Africa or Asia, the data would shift dramatically. For instance, infectious diseases or HIV/AIDS might show much higher totals and different growth patterns compared to the chronic, age-related conditions that currently dominate this European dataset.
+
 ---
 
 ## The Cardiovascular Divide: The Cardiovascular Landscape of Europe (2015)
