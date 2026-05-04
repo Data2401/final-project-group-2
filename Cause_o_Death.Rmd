@@ -441,7 +441,7 @@ ggplot(graph_data_top11, aes(x = Year, y = Total_Deaths, color = Disease)) +
 
 :::
 
-Based on the data presented in the visual, we are looking at a deep-dive into Mortality Trends in Europe between 1990 and 2015. The table on the left indicates a "Widespread" impact, showing that major causes of death like Cardiovascular Diseases and Alzheimer's affect all 42 countries in the dataset. The line graph utilizes a logarithmic scale to track the top 11 causes of death, revealing that while cardiovascular diseases remain the leading cause of mortality, most chronic conditions are showing a steady or slightly increasing trajectory in total deaths over time. However, it is important to note that these specific numbers and trends are tied directly to the European region; if the underlying code were modified to filter for a different continent or country—such as Africa or Asia, the data would shift dramatically. For instance, infectious diseases or HIV/AIDS might show much higher totals and different growth patterns compared to the chronic, age-related conditions that currently dominate this European dataset.
+Based on the data presented, we are looking at a deep-dive into Mortality Trends in Europe between 1990 and 2015. The table on the left indicates a "Widespread" impact, showing that major causes of death like Cardiovascular Diseases and Alzheimer's affect all 42 countries in the dataset. The line graph utilizes a logarithmic scale to track the top 11 causes of death, revealing that while cardiovascular diseases remain the leading cause of mortality, most chronic conditions are showing a steady or slightly increasing trajectory in total deaths over time. However, it is important to note that these specific numbers and trends are tied directly to the European region; if the underlying code were modified to filter for a different continent or country—such as Africa or Asia, the data would shift dramatically. For instance, infectious diseases or HIV/AIDS might show much higher totals and different growth patterns compared to the chronic, age-related conditions that currently dominate this European dataset.
 
 ---
 
@@ -554,3 +554,16 @@ cardio_2015 %>%
 :::
 
 :::
+
+The Cardiovascular Divide provides heart disease mortality across Europe in 2015. The map and accompanying table illustrate a significant geographic disparity, often referred to as the "East-West divide," where countries in Eastern Europe face a much higher mortality burden compared to their Western and Northern neighbors. For instance, Bulgaria and Ukraine show the highest rates, both exceeding 1,000 deaths per 100,000 people, while the lighter-shaded regions on the map indicate significantly lower rates in Western Europe.
+
+It is important to recognize that these specific figures are a direct result of the current data filtering and coding. If the code were adjusted to analyze a different variable, such as total death counts rather than mortality rates, larger countries might appear to have a "heavier" burden simply due to their population size. Similarly, if the geographical filter were shifted from Europe to a different continent, the "High" and "Low" benchmarks would change entirely, as the coding would then reflect a completely different set of regional health challenges and socioeconomic factors.
+
+<u>Fun Fact</u>
+
+The high cardiovascular mortality rates observed in Europe, particularly "East-West divide", are driven by a complex interplay of socioeconomic, behavioral, and environmental factors. Wealthier Western nations benefit from better-funded healthcare systems and policies focused on prevention, while Eastern regions often face higher psychosocial stress and limited access to timely medical interventions. Behavioral risks are a major contributor, as more than three-quarters of cardiovascular deaths in the EU are linked to modifiable factors like high salt and fat intake, tobacco use, and alcohol consumption. Additionally, biological risk factors such as hypertension affect an estimated 1 in 3 adults across the continent. Environmental triggers also play a critical role, with pollution and air quality accounting for approximately 18% of cardiovascular-related deaths in the region. As the population continues to age, these chronic conditions remain a primary health challenge for the European continent.
+
+<u>Further Reading & Sources</u>
+
+* [World Health Organization (WHO): Cardiovascular Diseases Fact Sheet](https://www.who.int/news-room/fact-sheets/detail/cardiovascular-diseases-(cvds))
+* [European Commission: Safe Hearts Plan](https://health.ec.europa.eu/document/download/dfb60cde-21a5-426d-8616-e394a326abc2_en?filename=ncd_com-2025-1024_act_en.pdf)
