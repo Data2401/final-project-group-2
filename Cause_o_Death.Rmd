@@ -89,12 +89,12 @@ dth_pplt_ds %>%
     bootstrap_options = c("bordered", "condensed", "hover"), 
     full_width = FALSE,  # This keeps the table from stretching
     position = "center",  # Centers the smaller table on the page
-    font_size = 18    # Manually shrink the text size (default is usually 16)
+    font_size = 13    # Manually shrink the text size (default is usually 16)
   ) %>%
   row_spec(0, background = "steelblue", color = "white") %>%
   # Explicitly set column widths to keep it "thin"
   column_spec(1:ncol(dth_pplt_ds), border_left = TRUE, border_right = TRUE) %>% 
-  scroll_box(width = "1400px", height = "350px") # Set a fixed pixel width instead of 100%
+  scroll_box(width = "900px", height = "350px") # Set a fixed pixel width instead of 100%
 ```
 
 ## What is Shown in our Data Set
@@ -160,14 +160,14 @@ combined_dictionary %>%
   kable_styling(bootstrap_options = c("bordered", "condensed"), 
                 full_width = FALSE, 
                 position = "center",
-                font_size = 26) %>%
+                font_size = 16) %>%
   # Header Styling
   row_spec(0, background = "steelblue", color = "white", bold = TRUE) %>%
   # Column Boxing and Widths
   column_spec(1, border_left = TRUE, border_right = TRUE, width = "15em", bold = TRUE) %>%
   column_spec(2, border_right = TRUE, width = "18em") %>%
   column_spec(3, border_right = TRUE, width = "18em") %>% 
-  scroll_box(width = "1400px", height = "550px")
+  scroll_box(width = "900px", height = "350px")
 ```
 
 ------------------------------------------------------------------------
@@ -223,17 +223,29 @@ ntrl_deaths <- ntrl_deaths %>%
   )
 ```
 
----
+------------------------------------------------------------------------
 
+<div style="height: 10px; clear: both;"></div>
 ## Regional Burden
 
 ### Which continents face the heaviest impact from biological diseases?
 
-  Based on the graph below, we see the trends from 4 different years in each continent. The main bar that stands out would be the one representing Africa. This trend shows that while at some point Africa did have one of the highest mortality rates, they were able to change that within the following years. Based on research, one of the biggest reasons for this trend is the use of netting while sleeping and stronger mosquito bug spray. 
+  Based on the graph below, we see the trends from 4 different years in each continent. The main bar that stands out would be the one representing Africa. This trend shows that while at some point Africa did have one of the highest mortality rates, they were able to change that within the following years. 
+
+<u>Fun Fact</u>
+
+  The tremendous decline in Africa's mortality rates between 2000 and 2015 was largely driven by aggressive interventions against malaria. During this period, malaria deaths in sub-Saharan Africa plummeted. This success was primarily due to the massive upgrade of insecticide-treated bed nets (ITNs), which prevented millions of infections while people slept, alongside the widespread implementation of indoor residual spraying and more effective artemisinin-based combination therapies. 
   
-  The biggest cause of deaths in Africa was Malaria, which is transmitted by mosquito. The implementation of using bug netting prevented even further spread of malaria. Mosquito spray also was a big impact to the spread of malaria and was able to reduce the numbers of people infected with malaria. 
+  The other big major factor in this dwindling death rate was the surge in financial capital directed toward medical advancement and healthcare infrastructure on the continent. A significant portion of this progress was fueled by large corporations and global philanthropic organizations that funded medical research and supply chains, motivated by the widespread promotion and global visibility of these humanitarian efforts. 
   
-  The other big reason as to why Africa was a dwindling death rate is the amount of money being used to fund medical advancement in Africa. A large portions of corporations will fund medical advancement in Africa because of how much promotion for these donation are widespread.
+  These targeted health initiatives, supported by global funding, successfully transformed malaria and other infectious diseases from a dominant, uncontrolled killer into a manageable public health challenge.
+  
+  <u>Further Reading & Sources</u>
+  
+* [World Health Organization (WHO): Malaria's Role in Mortality Decline](https://www.who.int/news-room/fact-sheets/detail/malaria)
+* [African Development Bank: Corporate Funding and Health Progress](https://www.afdb.org/fr/news-and-events/child-mortality-rates-in-sub-saharan-africa-fall-dramatically-13279)
+* [World Bank: Rates of progress in mortality decline, 2000-2019](https://openknowledge.worldbank.org/server/api/core/bitstreams/d5755e12-de39-4874-8f0c-d28d0e2863e7/content)
+
 
 ```{r, echo=FALSE}
 ntrl_deaths <- ntrl_deaths %>% 
@@ -318,7 +330,7 @@ ntrl_deaths %>%
   mutate(Growth = `2015` - `1990`) %>% # Optional: Shows the change
   arrange(desc(`2015`)) %>%
   kable(digits = 1, col.names = c("Continent", "1990 Rate", "2015 Rate", "Absolute Change")) %>%
-  kable_styling(bootstrap_options = c("striped", "condensed"), full_width = FALSE, font_size = 18) %>%
+  kable_styling(bootstrap_options = c("striped", "condensed"), full_width = FALSE, font_size = 12) %>%
   # Highlight the 2015 column to show it's the "Current" status
   column_spec(3, bold = TRUE, background = "#F0F8FF") %>%
   row_spec(0, background = "steelblue", color = "white")
@@ -336,6 +348,7 @@ We show deaths per 100,000 people so that large countries don't overshadow small
   Back to the original question we were trying to answer, to be able to figure out which continent we should focus on, lets further study the other trends in this graph. When we first originally made this graph, we made a point graph that was comparing the total deaths in a continent with the total population. The result was a linear graph in which the more population a continent had, the more deaths it had.Asia of course was the continent with the most amount of deaths 
   
   That graph was scrapped due to the lack of information we were able to collect with it. With the previous graph, you would believe that Asia would have one of the higher rates of death, but the opposite is true. Asia has one of the lowest death rates compared to the rest of the continents. The second continent with the highest death rates is Europe. The trend for Europe seems to be going upward slightly. While the trend may not be drastic, it would be best to consider Europe for the funding as our ultimate goal would be to lower any high death rates and make any trend go down.
+
 
 ## Distribution & Trends: Europe Deep-Dive
 
@@ -438,6 +451,9 @@ ggplot(graph_data_top11, aes(x = Year, y = Total_Deaths, color = Disease)) +
 :::
 
 :::
+
+Based on the data presented, we are looking at a deep-dive into Mortality Trends in Europe between 1990 and 2015. The table on the left indicates a "Widespread" impact, showing that major causes of death like Cardiovascular Diseases and Alzheimer's affect all 42 countries in the dataset. The line graph utilizes a logarithmic scale to track the top 11 causes of death, revealing that while cardiovascular diseases remain the leading cause of mortality, most chronic conditions are showing a steady or slightly increasing trajectory in total deaths over time. However, it is important to note that these specific numbers and trends are tied directly to the European region; if the underlying code were modified to filter for a different continent or country—such as Africa or Asia, the data would shift dramatically. For instance, infectious diseases or HIV/AIDS might show much higher totals and different growth patterns compared to the chronic, age-related conditions that currently dominate this European dataset.
+
 ---
 
 ## The Cardiovascular Divide: The Cardiovascular Landscape of Europe (2015)
@@ -549,3 +565,22 @@ cardio_2015 %>%
 :::
 
 :::
+
+The Cardiovascular Divide provides heart disease mortality across Europe in 2015. The map and accompanying table illustrate a significant geographic disparity, often referred to as the "East-West divide," where countries in Eastern Europe face a much higher mortality burden compared to their Western and Northern neighbors. For instance, Bulgaria and Ukraine show the highest rates, both exceeding 1,000 deaths per 100,000 people, while the lighter-shaded regions on the map indicate significantly lower rates in Western Europe.
+
+It is important to recognize that these specific figures are a direct result of the current data filtering and coding. If the code were adjusted to analyze a different variable, such as total death counts rather than mortality rates, larger countries might appear to have a "heavier" burden simply due to their population size. Similarly, if the geographical filter were shifted from Europe to a different continent, the "High" and "Low" benchmarks would change entirely, as the coding would then reflect a completely different set of regional health challenges and socioeconomic factors.
+
+<u>Fun Fact</u>
+
+The high cardiovascular mortality rates observed in Europe, particularly "East-West divide", are driven by a complex interplay of socioeconomic, behavioral, and environmental factors. Wealthier Western nations benefit from better-funded healthcare systems and policies focused on prevention, while Eastern regions often face higher psychosocial stress and limited access to timely medical interventions. Behavioral risks are a major contributor, as more than three-quarters of cardiovascular deaths in the EU are linked to modifiable factors like high salt and fat intake, tobacco use, and alcohol consumption. Additionally, biological risk factors such as hypertension affect an estimated 1 in 3 adults across the continent. Environmental triggers also play a critical role, with pollution and air quality accounting for approximately 18% of cardiovascular-related deaths in the region. As the population continues to age, these chronic conditions remain a primary health challenge for the European continent.
+
+<u>Further Reading & Sources</u>
+
+* [World Health Organization (WHO): Cardiovascular Diseases Fact Sheet](https://www.who.int/news-room/fact-sheets/detail/cardiovascular-diseases-(cvds))
+* [European Commission: Safe Hearts Plan](https://health.ec.europa.eu/document/download/dfb60cde-21a5-426d-8616-e394a326abc2_en?filename=ncd_com-2025-1024_act_en.pdf)
+
+## Summary
+
+This analysis addresses the challenge of identifying global mortality trends and regional health disparities by shifting the focus from raw death counts to meaningful population-adjusted rates. By integrating "Cause of Death" and "World Population" datasets from Kaggle, the problem of population bias was addressed through data cleaning, joining, and the calculation of Crude Death Rates per 100,000 people. The analysis yielded significant insights, notably revealing a dramatic decline in African mortality between 2000 and 2015 due to targeted malaria interventions, as well as a stark "East-West divide" in Europe where Eastern nations face cardiovascular mortality rates exceeding 1,000 per 100,000. These findings imply that global healthcare funds should prioritize Eastern Europe for heart disease prevention and continue supporting the infrastructure that led to Africa’s successes.
+
+However, a primary limitation is that the findings are constrained by the specific variables filtered in the code and the fact that the timeline of the primary analysis concludes in 2015. The accuracy and relevance of the data would be significantly improved if the timeline extended to the previous year, allowing for a more contemporary understanding of health trends. Furthermore, extending the data would allow for an analysis of how the COVID-19 pandemic potentially shifted mortality trajectories, disrupted healthcare infrastructure, and altered the prevalence of both communicable and chronic diseases globally. Future improvements could include expanding the deep-dive to other continents, integrating longitudinal socioeconomic data, and incorporating these recent global health events to better understand the drivers behind regional health divides.
